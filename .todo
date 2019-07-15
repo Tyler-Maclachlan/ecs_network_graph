@@ -1,13 +1,14 @@
 ECS:
     Components:
-        ☐ position
+        ✔ position @started(19-07-14 23:16) @done(19-07-14 23:20) @lasted(4m23s)
         style:
             ☐ images
             ☐ colors
             ☐ shapes
             ☐ text
+            ☐ size
         physics:
-            ☐ Spring
+            ✔ Spring @started(19-07-14 23:20) @done(19-07-14 23:22) @lasted(2m52s)
             ☐ Gravitational
         ☐ user control
         cluster:

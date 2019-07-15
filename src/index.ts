@@ -1,4 +1,5 @@
 import uuid from "./Utils/uuid";
+import { Options } from "./types";
 
 const VNetGraph = function VNetGraph(
   container: HTMLCanvasElement,
