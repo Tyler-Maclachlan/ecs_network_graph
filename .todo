@@ -1,0 +1,52 @@
+ECS:
+    Components:
+        ☐ position
+        style:
+            ☐ images
+            ☐ colors
+            ☐ shapes
+            ☐ text
+        physics:
+            ☐ Spring
+            ☐ Gravitational
+        ☐ user control
+        cluster:
+            ☐ Nodes
+            ☐ Edges
+    Systems:
+        Rendering:
+            ☐ Canvas
+            ☐ WebGL
+        Physics:
+            ☐ Spring
+            ☐ Gravitational
+        ☐ Clustering
+        ☐ Styling
+        Image:
+            ☐ Loader
+            ☐ Cache
+    Entities (Assemblages):
+        node:
+            ☐ position
+            physics:
+                ☐ gravitational
+            style:
+                ☐ images
+                ☐ shapes
+                ☐ text
+                ☐ colors
+            cluster:
+                ☐ nodes
+        edge:
+            ☐ node1
+            ☐ node2
+            physics:
+                ☐ spring
+        labels:
+            ☐ position
+            style:
+                ☐ text
+                ☐ colors
+        
+            
+    
