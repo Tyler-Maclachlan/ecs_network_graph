@@ -1,0 +1,16 @@
+VNetGraph
+
+Network graphing library
+
+Features:
+    Force based physics
+    WebGL / Canvas renderer
+    Shapes
+    Images + image caching
+    Clustering
+    Dynamic
+    History?
+    Animations?
+    Touch Enabled
+    SVG/html (in nodes/edges/labels)?
+    

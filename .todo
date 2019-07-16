@@ -1,3 +1,7 @@
+Project:
+    ☐ Project Description (write README)
+    ☐ API docs
+
 ECS:
     Components:
         ✔ position @started(19-07-14 23:16) @done(19-07-14 23:20) @lasted(4m23s)
