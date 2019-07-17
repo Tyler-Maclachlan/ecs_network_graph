@@ -5,15 +5,16 @@ Project:
 ECS:
     Components:
         ✔ position @started(19-07-14 23:16) @done(19-07-14 23:20) @lasted(4m23s)
+        ✔ velocity @started(19-07-17 15:17) @done(19-07-17 15:19) @lasted(2m21s)
         style:
-            ☐ images
-            ☐ colors
-            ☐ shapes
-            ☐ text
-            ☐ size
+            ✔ images @started(19-07-17 15:43) @done(19-07-17 15:44) @lasted(1m37s)
+            ✔ colors @started(19-07-16 17:34) @done(19-07-16 17:37) @lasted(3m13s)
+            ✔ shapes @started(19-07-17 15:25) @done(19-07-17 15:26) @lasted(1m43s)
+            ✔ text @started(19-07-17 15:39) @done(19-07-17 15:40) @lasted(1m44s)
+            ✔ size @started(19-07-17 15:40) @done(19-07-17 15:41) @lasted(1m50s)
         physics:
             ✔ Spring @started(19-07-14 23:20) @done(19-07-14 23:22) @lasted(2m52s)
-            ☐ Gravitational
+            ✔ Gravitational @started(19-07-17 15:41) @done(19-07-17 15:43) @lasted(2m23s)
         ☐ user control
         cluster:
             ☐ Nodes

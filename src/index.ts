@@ -1,4 +1,4 @@
-import uuid from './Utils/uuid';
+import { uuid } from './Utils/index';
 
 const VNetGraph = function VNetGraph(
   container: HTMLCanvasElement,
@@ -10,6 +10,8 @@ const VNetGraph = function VNetGraph(
     entities: {},
     systems: {}
   };
+
+  // TODO:
 
   let entity = uuid();
 };

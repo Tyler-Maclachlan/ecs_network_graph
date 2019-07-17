@@ -1,14 +1,20 @@
-const SpringComponent = function SpringComponent(
+const SpringComponent = function(
   this: any,
-  entity1: any,
-  entity2: any
+  entity1ID: string,
+  entity2ID: string
 ) {
-  if (!entity1 || !entity2) {
-    throw new Error("A spring needs two ends.");
+  if (entity1ID && entity2ID) {
+    // TODO: check entity IDs exist
+  } else {
+    throw new Error('A spring needs two ends.');
   }
 
-  this.e1 = entity1;
-  this.e2 = entity2;
+  this.entity1ID = entity1ID;
+  this.entity2ID = entity2ID;
 
   return this;
 };
+
+SpringComponent.prototype.name = 'spring';
+
+export default SpringComponent;

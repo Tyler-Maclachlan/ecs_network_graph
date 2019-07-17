@@ -3,3 +3,11 @@ type Options = {
 };
 
 type Entity = string;
+
+type Shape =
+  | 'circle'
+  | 'triangle'
+  | 'square'
+  | 'rectangle'
+  | 'image'
+  | 'imageCircular';
