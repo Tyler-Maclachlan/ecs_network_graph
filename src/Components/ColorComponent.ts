@@ -1,4 +1,8 @@
-const ColorComponent = function(this: any, bgColor: string, textColor: string) {
+const ColorComponent = function(
+  this: any,
+  bgColor?: string,
+  textColor?: string
+) {
   this.bgColor = bgColor || '#fefefe';
   this.textColor = textColor || '#fefefe';
   return this;

@@ -49,6 +49,7 @@ ECS:
             physics:
                 ☐ spring
         labels:
+            ☐ entityID
             ☐ position
             style:
                 ☐ text
