@@ -5,10 +5,10 @@ Network graphing library
 Features:
     Force based physics
     WebGL / Canvas renderer
+    Dynamic
     Shapes
     Images + image caching
     Clustering
-    Dynamic
     History?
     Animations?
     Touch Enabled

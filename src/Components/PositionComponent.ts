@@ -1,7 +1,4 @@
-const PositionComponent = function(
-  this: any,
-  position?: { x: number; y: number }
-) {
+const PositionComponent = function(this: any, position?: Vector2D) {
   this.position = position || { x: Math.random() * 20, y: Math.random() * 20 };
   return this;
 };

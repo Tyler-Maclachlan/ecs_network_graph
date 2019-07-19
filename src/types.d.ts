@@ -11,3 +11,8 @@ type Shape =
   | 'rectangle'
   | 'image'
   | 'imageCircular';
+
+type Vector2D = {
+  x: number;
+  y: number;
+};
