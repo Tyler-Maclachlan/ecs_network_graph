@@ -5,14 +5,16 @@ type Options = {
 type Entity = string;
 
 type Shape =
-  | 'circle'
-  | 'triangle'
-  | 'square'
-  | 'rectangle'
-  | 'image'
-  | 'imageCircular';
+  | "circle"
+  | "triangle"
+  | "square"
+  | "rectangle"
+  | "image"
+  | "imageCircular";
 
 type Vector2D = {
   x: number;
   y: number;
 };
+
+type Option<T> = T | undefined | null;
