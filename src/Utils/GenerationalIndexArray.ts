@@ -1,4 +1,5 @@
 import { GenerationalIndex } from "./index";
+import { Option } from "../types";
 
 interface ArrayElement<T> {
   value: T;

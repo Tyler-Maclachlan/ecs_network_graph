@@ -2,16 +2,17 @@ import {
   GenerationalIndexAllocator as EntityAllocator,
   GenerationalIndex as Entity,
   GenerationalIndexArray as EntityMap
-} from '../Utils/index';
-import ShapeComponent from '../Components/ShapeComponent';
-import PositionComponent from '../Components/PositionComponent';
-import SizeComponent from '../Components/SizeComponent';
-import LabelComponent from '../Components/LabelComponent';
-import VelocityComponent from '../Components/VelocityComponent';
-import ColorComponent from '../Components/ColorComponent';
-import ImageComponent from '../Components/ImageComponent';
-import DataComponent from '../Components/DataComponent';
-import AccelerationComponent from '../Components/AccelerationComponent';
+} from "../Utils/index";
+import ShapeComponent from "../Components/ShapeComponent";
+import PositionComponent from "../Components/PositionComponent";
+import SizeComponent from "../Components/SizeComponent";
+import LabelComponent from "../Components/LabelComponent";
+import VelocityComponent from "../Components/VelocityComponent";
+import ColorComponent from "../Components/ColorComponent";
+import ImageComponent from "../Components/ImageComponent";
+import DataComponent from "../Components/DataComponent";
+import AccelerationComponent from "../Components/AccelerationComponent";
+import { NodeComponent, NodeComponents } from "../types";
 
 export default class NodeManager {
   private _allocator: EntityAllocator;
@@ -65,17 +66,23 @@ export default class NodeManager {
     });
   }
 
-  public getNodeComponentData(node: Entity, component: string) {
-    if (!this._components[component]) {
-      throw new Error('This component does not exist');
-    }
+  public getNodeComponentData(
+    node: Entity,
+    component: string
+  ): NodeComponent | null {
+    if (!this._components[component])
+      throw new Error("This component does not exist");
+    if (!this._components[component].has(node)) return null;
+
     return this._components[component].get(node);
   }
 
-  public getNodeComponents(node: Entity) {
+  public getNodeComponents(node: Entity): NodeComponents {
     const components = {};
     Object.keys(this._components).forEach(key => {
-      components[key] = this.getNodeComponentData(node, key);
+      if (this._components[key].has(node)) {
+        components[key] = this.getNodeComponentData(node, key);
+      }
     });
     return components;
   }

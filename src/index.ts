@@ -1,6 +1,7 @@
-import NodeManager from './Managers/NodeManager';
-import EdgeManager from './Managers/EdgeManager';
-import ColorComponent from './Components/ColorComponent';
+import NodeManager from "./Managers/NodeManager";
+import EdgeManager from "./Managers/EdgeManager";
+import ColorComponent from "./Components/ColorComponent";
+import { Options } from "./types";
 
 const VNetGraph = function VNetGraph(
   this: any,
@@ -14,8 +15,8 @@ const VNetGraph = function VNetGraph(
 
   nodeManager.bulkCreateNodes(nodes, options);
   edgeManager.bulkCreateEdges(edges, {
-    color: { fillColor: '', textColor: '' },
-    label: ''
+    color: { fillColor: "", textColor: "" },
+    label: ""
   });
 
   return this;
