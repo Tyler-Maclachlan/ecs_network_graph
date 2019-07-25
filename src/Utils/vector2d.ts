@@ -1,3 +1,5 @@
+import { Vector2D } from '../types';
+
 export function addVecs(vec1: Vector2D, vec2: Vector2D): Vector2D {
   return {
     x: vec1.x + vec2.x,
