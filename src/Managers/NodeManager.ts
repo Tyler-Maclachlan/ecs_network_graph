@@ -12,7 +12,6 @@ import ColorComponent from '../Components/ColorComponent';
 import ImageComponent from '../Components/ImageComponent';
 import DataComponent from '../Components/DataComponent';
 import AccelerationComponent from '../Components/AccelerationComponent';
-import { NodeComponent, NodeComponents } from '../types';
 
 export default class NodeManager {
   private _allocator: EntityAllocator;
@@ -74,7 +73,7 @@ export default class NodeManager {
     return this._components[component].get(node);
   }
 
-  public getNodeComponents(node: Entity): NodeComponents {
+  public getNodeComponents(node: Entity) {
     const components = {};
     Object.keys(this._components).forEach(key => {
       if (this._components[key].has(node)) {

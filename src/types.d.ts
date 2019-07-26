@@ -14,6 +14,8 @@ import VelocityComponent from "./Components/VelocityComponent";
 import ImageComponent from "./Components/ImageComponent";
 import AccelerationComponent from "./Components/AccelerationComponent";
 
+interface IComponent { }
+
 type Options = {
   [key: string]: any;
 };
