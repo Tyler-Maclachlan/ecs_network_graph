@@ -1,34 +1,31 @@
-import SpringComponent from "./Components/SpringComponent";
-import LabelComponent from "./Components/LabelComponent";
-import ColorComponent from "./Components/ColorComponent";
-import DataComponent from "./Components/DataComponent";
+import SpringComponent from './Components/SpringComponent';
+import LabelComponent from './Components/LabelComponent';
+import ColorComponent from './Components/ColorComponent';
+import DataComponent from './Components/DataComponent';
 import {
   GenerationalIndexAllocator as EntityAllocator,
   GenerationalIndexArray as EntityMap,
   GenerationalIndex as Entity
-} from "./Utils/index";
-import ShapeComponent from "./Components/ShapeComponent";
-import PositionComponent from "./Components/PositionComponent";
-import SizeComponent from "./Components/SizeComponent";
-import VelocityComponent from "./Components/VelocityComponent";
-import ImageComponent from "./Components/ImageComponent";
-import AccelerationComponent from "./Components/AccelerationComponent";
+} from './Utils/index';
+import ShapeComponent from './Components/ShapeComponent';
+import PositionComponent from './Components/PositionComponent';
+import SizeComponent from './Components/SizeComponent';
+import VelocityComponent from './Components/VelocityComponent';
+import ImageComponent from './Components/ImageComponent';
+import AccelerationComponent from './Components/AccelerationComponent';
 
-interface IComponent { }
+interface Component {
+  readonly name: string;
+}
+
+type Newable<T> = { new (...args: any[]): T };
 
 type Options = {
   [key: string]: any;
 };
 
-type Entity = string;
-
-type Shape =
-  | "circle"
-  | "triangle"
-  | "square"
-  | "rectangle"
-  | "image"
-  | "imageCircular";
+type Shape = 'circle' | 'square' | 'rectangle' | 'image' | 'imageCircular';
+type Alignment = 'top' | 'middle' | 'bottom' | 'left' | 'right';
 
 type Vector2D = {
   x: number;
@@ -55,20 +52,65 @@ type NodeComponent =
   | AccelerationComponent;
 
 type NodeComponents = {
-  shape?: EntityMap<ShapeComponent>;
-  position?: EntityMap<PositionComponent>;
-  size?: EntityMap<SizeComponent>;
-  label?: EntityMap<LabelComponent>;
-  velocity?: EntityMap<VelocityComponent>;
-  color?: EntityMap<ColorComponent>;
-  image?: EntityMap<ImageComponent>;
-  data?: EntityMap<DataComponent>;
-  acceleration?: EntityMap<AccelerationComponent>;
+  shape?: ShapeComponent;
+  position?: PositionComponent;
+  size?: SizeComponent;
+  label?: LabelComponent;
+  velocity?: VelocityComponent;
+  color?: ColorComponent;
+  image?: ImageComponent;
+  data?: DataComponent;
+  acceleration?: AccelerationComponent;
 };
 
 type EdgeComponents = {
-  spring?: EntityMap<SpringComponent>;
-  label?: EntityMap<LabelComponent>;
-  color?: EntityMap<ColorComponent>;
-  data?: EntityMap<DataComponent>;
+  spring?: SpringComponent;
+  label?: LabelComponent;
+  color?: ColorComponent;
+  data?: DataComponent;
+};
+
+type NodeOptions = {
+  id: string | number;
+  size: {
+    width: number;
+    height: number;
+  };
+  shape: Shape;
+  image?: string;
+  label?: {
+    text: string;
+    alignment: Alignment;
+  };
+  color?: {
+    textColor: string;
+    fillColor: string;
+  };
+  data?: {
+    [key: string]: any;
+  };
+};
+
+type EdgeOptions = {
+  id: string | number;
+  to: string | number;
+  from: string | number;
+  label?: {
+    text: string;
+    alignment: Alignment;
+  };
+  color?: {
+    textColor: string;
+    fillColor: string;
+  };
+  data?: {
+    [key: string]: any;
+  };
+};
+
+type Bounds = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
 };

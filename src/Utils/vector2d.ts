@@ -7,6 +7,13 @@ export function addVecs(vec1: Vector2D, vec2: Vector2D): Vector2D {
   };
 }
 
+export function getMidpointBetweenVecs(
+  vec1: Vector2D,
+  vec2: Vector2D
+): Vector2D {
+  return divideVecByScalar(addVecs(vec1, vec2), 2);
+}
+
 export function subVecs(vec1: Vector2D, vec2: Vector2D): Vector2D {
   return {
     x: vec1.x - vec2.x,
@@ -62,8 +69,8 @@ export function normalizeVec(vec: Vector2D): Vector2D {
 }
 
 export function getDistanceBetweenVecs(vec1: Vector2D, vec2: Vector2D) {
-  const dx = vec1.x - vec2.x;
-  const dy = vec1.y - vec2.y;
+  const dx = vec2.x - vec1.x;
+  const dy = vec2.y - vec1.y;
 
   return Math.sqrt(dx * dx + dy * dy);
 }

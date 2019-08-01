@@ -18,43 +18,43 @@ export function SpringSystem(
   const numEdges = edges.length;
 
   for (let i = 0; i < numEdges; i++) {
-    let _edge: SpringComponent = edgeManager.getEdgeComponentData(
+    let _edge = edgeManager.getComponent<SpringComponent>(
       edges[i],
-      'spring'
+      SpringComponent
     );
-    let node1pos: PositionComponent = nodeManager.getNodeComponentData(
-      _edge.from,
-      'position'
+    let node1pos = nodeManager.getComponent<PositionComponent>(
+      _edge!.from,
+      PositionComponent
     );
-    let node1vel: VelocityComponent = nodeManager.getNodeComponentData(
-      _edge.from,
-      'velocity'
+    let node1vel = nodeManager.getComponent<VelocityComponent>(
+      _edge!.from,
+      VelocityComponent
     );
-    let node1acc: AccelerationComponent = nodeManager.getNodeComponentData(
-      _edge.from,
-      'acceleration'
+    let node1acc = nodeManager.getComponent<AccelerationComponent>(
+      _edge!.from,
+      AccelerationComponent
     );
-    let node2pos: PositionComponent = nodeManager.getNodeComponentData(
-      _edge.to,
-      'position'
+    let node2pos = nodeManager.getComponent<PositionComponent>(
+      _edge!.to,
+      PositionComponent
     );
-    let node2vel: VelocityComponent = nodeManager.getNodeComponentData(
-      _edge.to,
-      'velocity'
+    let node2vel = nodeManager.getComponent<VelocityComponent>(
+      _edge!.to,
+      VelocityComponent
     );
-    let node2acc: AccelerationComponent = nodeManager.getNodeComponentData(
-      _edge.to,
-      'acceleration'
+    let node2acc = nodeManager.getComponent<AccelerationComponent>(
+      _edge!.to,
+      AccelerationComponent
     );
 
-    let distance = getDistanceBetweenVecs(node1pos, node2pos);
-    distance = Math.max(1, distance);
+    let distance = getDistanceBetweenVecs(node1pos!, node2pos!);
+    distance = distance >= 1 ? distance : 1;
 
-    const norm1 = normalizeVec(subVecs(node2pos, node1pos));
-    const norm2 = normalizeVec(subVecs(node2pos, node1pos));
+    const norm1 = normalizeVec(subVecs(node2pos!, node1pos!));
+    const norm2 = normalizeVec(subVecs(node1pos!, node2pos!));
 
-    const v1 = subVecs(node1vel, node2vel);
-    const v2 = subVecs(node2vel, node1vel);
+    const v1 = subVecs(node1vel!, node2vel!);
+    const v2 = subVecs(node2vel!, node1vel!);
 
     const stiffnessXd = stiffness * (distance - restDistance);
 
@@ -64,10 +64,10 @@ export function SpringSystem(
     const fx2 = stiffnessXd * (norm2.x / distance) - damping * v2.x;
     const fy2 = stiffnessXd * (norm2.y / distance) - damping * v2.y;
 
-    node1acc.x += fx1;
-    node1acc.y += fy1;
+    node1acc!.x += fx1;
+    node1acc!.y += fy1;
 
-    node2acc.x += fx2;
-    node2acc.y += fy2;
+    node2acc!.x += fx2;
+    node2acc!.y += fy2;
   }
 }

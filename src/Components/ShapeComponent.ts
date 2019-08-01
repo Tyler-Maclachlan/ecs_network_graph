@@ -1,5 +1,6 @@
-import { IComponent } from "../types";
+import { Component, Shape } from '../types';
 
-export default class ShapeComponent implements IComponent {
-  public shape: 'box' | 'circle' | 'triangle' = 'box';
+export default class ShapeComponent implements Component {
+  readonly name = 'shape';
+  public shape: Shape = 'rectangle';
 }
