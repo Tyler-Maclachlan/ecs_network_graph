@@ -119,7 +119,7 @@ export default class ForceSystem {
     };
   }
 
-  public update(bounds: Bounds, nodeManager: NodeManager, deltaTime: number) {
+  public update(bounds: Bounds, nodeManager: NodeManager) {
     const nodes = nodeManager.nodes;
     const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
     const nodeVelocities = nodeManager.getComponentsOfType(VelocityComponent);
@@ -141,21 +141,22 @@ export default class ForceSystem {
       );
       let acc = addVecs(nodeAcc, force);
 
-      if (Math.abs(acc.x) < 0.001) {
-        acc.x = 0;
-      }
-      if (Math.abs(acc.y) < 0.001) {
-        acc.y = 0;
-      }
-
       let vel = addVecs(nodeVel, acc);
       nodePos.x += vel.x;
       nodePos.y += vel.y;
 
       vel = multiplyVecByScalar(vel, 0.7);
       acc = multiplyVecByScalar(acc, 0.3);
+
       nodeVel.x = vel.x;
       nodeVel.y = vel.y;
+
+      if (Math.abs(acc.x) < 0.001) {
+        acc.x = 0;
+      }
+      if (Math.abs(acc.y) < 0.001) {
+        acc.y = 0;
+      }
 
       nodeAcc.x = acc.x;
       nodeAcc.y = acc.y;

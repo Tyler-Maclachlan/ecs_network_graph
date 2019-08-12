@@ -13,8 +13,8 @@ export default class VNetGraph {
 
   constructor(
     container: HTMLCanvasElement,
-    nodes: [],
-    edges: [],
+    nodes: NodeOptions[],
+    edges: EdgeOptions[],
     options: Options
   ) {
     this._renderer = new RenderSystem(container);
@@ -35,9 +35,7 @@ export default class VNetGraph {
     const eLen = edges.length;
     let i;
 
-    for (i = 0; i < nLen; i++) {
-      this._nodeManager.createNode(nodes[i]);
-    }
+    this._nodeManager.bulkCreateNodes(nodes);
 
     for (i = 0; i < eLen; i++) {
       const edge = edges[i];

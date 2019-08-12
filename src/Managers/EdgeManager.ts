@@ -18,7 +18,7 @@ import {
 export default class EdgeManager {
   private _allocator: EntityAllocator;
   private _edges: Entity[];
-  private _componentStores: Map<String, EntityMap<Component>>;
+  private _componentStores: Map<string, EntityMap<Component>>;
 
   constructor() {
     this._allocator = new EntityAllocator();
@@ -51,6 +51,19 @@ export default class EdgeManager {
     _color.textColor = color.textColor;
   }
 
+  public deleteEdge(edge: Entity): boolean {
+    if (this._allocator.deallocate(edge)) {
+      this._componentStores.forEach(store => {
+        if (store.has(edge)) {
+          store.delete(edge);
+        }
+      });
+      return true;
+    }
+
+    return false;
+  }
+
   public addComponent<T extends Component>(edge: Entity, component: T): T {
     const componentName = component.name;
 
@@ -63,6 +76,20 @@ export default class EdgeManager {
 
     store.set(edge, component);
     return component;
+  }
+
+  public removeComponent<T extends Component>(
+    edge: Entity,
+    component: T
+  ): boolean {
+    const store = this._componentStores.get(component.name);
+
+    if (store && store.has(edge)) {
+      store.delete(edge);
+      return true;
+    }
+
+    return false;
   }
 
   public bulkCreateEdges(edges: SpringComponent[], options: EdgeOptions) {
@@ -114,7 +141,7 @@ export default class EdgeManager {
     const components: { [key: string]: Component } = {};
     this._componentStores.forEach((store, storeName) => {
       if (store.has(edge)) {
-        components[storeName.toString()] = store.get(edge);
+        components[storeName] = store.get(edge);
       }
     });
     return components;

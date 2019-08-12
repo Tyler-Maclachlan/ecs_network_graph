@@ -1,7 +1,8 @@
 import {
   GenerationalIndexAllocator as EntityAllocator,
   GenerationalIndex as Entity,
-  GenerationalIndexArray as EntityMap
+  GenerationalIndexArray as EntityMap,
+  uuid
 } from '../Utils/index';
 import ShapeComponent from '../Components/ShapeComponent';
 import PositionComponent from '../Components/PositionComponent';
@@ -13,61 +14,80 @@ import ImageComponent from '../Components/ImageComponent';
 import DataComponent from '../Components/DataComponent';
 import AccelerationComponent from '../Components/AccelerationComponent';
 import { Component, Newable, NodeOptions } from '../types';
+import UserControlledComponent from '../Components/UserControlledComponent';
 
 export default class NodeManager {
   private _allocator: EntityAllocator;
   private _nodes: Entity[];
   private _idToEntityMap: Map<string | number, Entity>;
+  private _entityToIdMap: Map<Entity, string | number>;
   private _componentStores: Map<string, EntityMap<Component>>;
 
   constructor() {
     this._allocator = new EntityAllocator();
     this._idToEntityMap = new Map();
+    this._entityToIdMap = new Map();
     this._nodes = [];
     this._componentStores = new Map<string, EntityMap<Component>>();
   }
 
   public createNode(options: NodeOptions) {
-    const { id, shape, color, size, label } = options;
+    let { id, shape, color, size, label, data } = options;
+    if (!id) {
+      id = uuid();
+    }
     if (this._idToEntityMap.has(id)) {
       throw new Error('Node already exists');
     }
     const _node = this._allocator.allocate();
     this._idToEntityMap.set(id, _node);
+    this._entityToIdMap.set(_node, id);
     this._nodes.push(_node);
 
     //Create components
+    // Mandatory components
     this.addComponent(_node, new PositionComponent());
     this.addComponent(_node, new VelocityComponent());
     this.addComponent(_node, new AccelerationComponent());
-    this.addComponent(_node, new ShapeComponent());
-    this.addComponent(_node, new DataComponent());
-    this.addComponent(_node, new LabelComponent());
-    this.addComponent(_node, new ColorComponent());
-    this.addComponent(_node, new SizeComponent());
+
+    //Components that can have values in 'options'
+    const colorComponent = this.addComponent(_node, new ColorComponent());
+    const shapeComponent = this.addComponent(_node, new ShapeComponent());
+    const sizeComponent = this.addComponent(_node, new SizeComponent());
+
     if (shape === 'image' || shape === 'imageCircular') {
-      this.addComponent(_node, new ImageComponent());
+      const imageComponent = this.addComponent(_node, new ImageComponent());
+      imageComponent.image = options.image;
+    }
+    if (shape) {
+      shapeComponent.shape = shape;
     }
 
-    const sizeComponent = this.getComponent(_node, SizeComponent);
-    sizeComponent.height = size.height;
-    sizeComponent.width = size.width;
+    if (size.height && size.width) {
+      sizeComponent.height = size.height || sizeComponent.height;
+      sizeComponent.width = size.width || sizeComponent.width;
+    }
 
-    const shapeComponent = this.getComponent(_node, ShapeComponent);
-    shapeComponent.shape = shape;
+    if (color) {
+      colorComponent.fillColor = color.fillColor || colorComponent.fillColor;
+      colorComponent.textColor = color.textColor || colorComponent.textColor;
+    }
 
-    const colorComponent = this.getComponent(_node, ColorComponent);
-    colorComponent.fillColor = color.fillColor;
-    colorComponent.textColor = color.textColor;
-
-    const labelComponent = this.getComponent(_node, LabelComponent);
-    labelComponent.text = label.text;
-    labelComponent.alignment = label.alignment;
+    // Optional Components
+    if (data) {
+      const dataComponent = this.addComponent(_node, new DataComponent());
+      dataComponent.data = data;
+    }
+    if (label) {
+      const labelComponent = this.addComponent(_node, new LabelComponent());
+      labelComponent.text = label.text;
+      labelComponent.alignment = label.alignment;
+    }
   }
 
-  public bulkCreateNodes(nodes: [], options: NodeOptions) {
-    nodes.forEach(() => {
-      this.createNode(options);
+  public bulkCreateNodes(nodes: NodeOptions[]) {
+    nodes.forEach(node => {
+      this.createNode(node);
     });
   }
 
@@ -84,6 +104,19 @@ export default class NodeManager {
     store.set(node, component);
 
     return component;
+  }
+
+  public removeComponent<T extends Component>(
+    node: Entity,
+    component: T
+  ): boolean {
+    const store = this._componentStores.get(component.name);
+    if (store && store.has(node)) {
+      store.delete(node);
+      return true;
+    }
+
+    return false;
   }
 
   public getComponent<T extends Component>(
@@ -121,6 +154,31 @@ export default class NodeManager {
     return Array.from(store);
   }
 
+  public getNonUserControlledNodesWithComponent<T extends Component>(
+    component: Newable<T>
+  ): Array<T> {
+    const store = this._componentStores.get(component.name) as EntityMap<T>;
+    const controlledStore = this._componentStores.get(
+      'usercontrolled'
+    ) as EntityMap<UserControlledComponent>;
+
+    if (store === undefined) {
+      return [];
+    }
+
+    if (!controlledStore || !controlledStore.length) {
+      return Array.from(store);
+    } else {
+      let storeArr = Array.from(store);
+      controlledStore.indices().forEach(node => {
+        if (store.has(node) && controlledStore.get(node).isControlled) {
+          storeArr = storeArr.splice(node.index, 1);
+        }
+      });
+      return storeArr;
+    }
+  }
+
   public getAllNodesWithComponent<T extends Component>(
     component: Newable<T>
   ): Array<Entity> {
@@ -131,6 +189,16 @@ export default class NodeManager {
     }
 
     return store.indices();
+  }
+
+  public deleteNode(node: Entity) {
+    if (this._allocator.deallocate(node)) {
+      this._componentStores.forEach(store => {
+        if (store.has(node)) {
+          store.delete(node);
+        }
+      });
+    }
   }
 
   public getNodeEntity(id: string | number) {

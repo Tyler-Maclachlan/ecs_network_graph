@@ -8,44 +8,33 @@ import { getDistanceBetweenVecs, normalizeVec, subVecs } from '../Utils/index';
 
 export function SpringSystem(
   edgeManager: EdgeManager,
-  nodeManager: NodeManager
+  nodeManager: NodeManager,
+  options?: {
+    stiffness: number;
+    damping: number;
+    restDistance: number;
+  }
 ) {
-  const stiffness = 10;
-  const damping = 0.03;
-  const restDistance = 200;
+  const stiffness = (options && options.stiffness) || 10;
+  const damping = (options && options.damping) || 0.03;
+  const restDistance = (options && options.restDistance) || 200;
 
-  const edges = edgeManager.edges;
+  const edges = edgeManager.getComponentsOfType(SpringComponent);
+  const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
+  const nodeVels = nodeManager.getComponentsOfType(VelocityComponent);
+  const nodeAccs = nodeManager.getComponentsOfType(AccelerationComponent);
   const numEdges = edges.length;
 
   for (let i = 0; i < numEdges; i++) {
-    let _edge = edgeManager.getComponent<SpringComponent>(
-      edges[i],
-      SpringComponent
-    );
-    let node1pos = nodeManager.getComponent<PositionComponent>(
-      _edge!.from,
-      PositionComponent
-    );
-    let node1vel = nodeManager.getComponent<VelocityComponent>(
-      _edge!.from,
-      VelocityComponent
-    );
-    let node1acc = nodeManager.getComponent<AccelerationComponent>(
-      _edge!.from,
-      AccelerationComponent
-    );
-    let node2pos = nodeManager.getComponent<PositionComponent>(
-      _edge!.to,
-      PositionComponent
-    );
-    let node2vel = nodeManager.getComponent<VelocityComponent>(
-      _edge!.to,
-      VelocityComponent
-    );
-    let node2acc = nodeManager.getComponent<AccelerationComponent>(
-      _edge!.to,
-      AccelerationComponent
-    );
+    let _edge = edges[i];
+
+    let node1pos = nodePositions[_edge.from.index];
+    let node1vel = nodeVels[_edge.from.index];
+    let node1acc = nodeAccs[_edge.from.index];
+
+    let node2pos = nodePositions[_edge.to.index];
+    let node2vel = nodeVels[_edge.to.index];
+    let node2acc = nodeAccs[_edge.to.index];
 
     let distance = getDistanceBetweenVecs(node1pos!, node2pos!);
     distance = distance >= 1 ? distance : 1;
@@ -64,10 +53,10 @@ export function SpringSystem(
     const fx2 = stiffnessXd * (norm2.x / distance) - damping * v2.x;
     const fy2 = stiffnessXd * (norm2.y / distance) - damping * v2.y;
 
-    node1acc!.x += fx1;
-    node1acc!.y += fy1;
+    node1acc.x += fx1;
+    node1acc.y += fy1;
 
-    node2acc!.x += fx2;
-    node2acc!.y += fy2;
+    node2acc.x += fx2;
+    node2acc.y += fy2;
   }
 }

@@ -71,8 +71,10 @@ export default class RenderSystem {
   }
 
   public render(edgeManager: EdgeManager, nodeManager: NodeManager) {
-    const edges = edgeManager.getComponentsOfType(SpringComponent);
-    const nodes = nodeManager.getComponentsOfType(PositionComponent);
+    const edges = edgeManager.edges;
+    const nodes = nodeManager.nodes;
+    const springs = edgeManager.getComponentsOfType(SpringComponent);
+    const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
     const shapes = nodeManager.getComponentsOfType(ShapeComponent);
 
     const eLen = edges.length;
@@ -84,15 +86,23 @@ export default class RenderSystem {
     this._graphics.lineStyle(1, 0x0000ff, 1);
     for (i = 0; i < eLen; i++) {
       const edge = edges[i];
-      this._graphics.moveTo(nodes[edge.from.index].x, nodes[edge.from.index].y);
-      this._graphics.lineTo(nodes[edge.to.index].x, nodes[edge.to.index].y);
+      const spring = springs[edge.index];
+      this._graphics.moveTo(
+        nodePositions[spring.from.index].x,
+        nodePositions[spring.from.index].y
+      );
+      this._graphics.lineTo(
+        nodePositions[spring.to.index].x,
+        nodePositions[spring.to.index].y
+      );
     }
 
     // draw nodes
     this._graphics.lineStyle(0);
     for (i = 0; i < nLen; i++) {
-      const { x, y } = nodes[i];
-      switch (shapes[i].shape) {
+      const node = nodes[i];
+      const { x, y } = nodePositions[node.index];
+      switch (shapes[node.index].shape) {
         case 'rectangle': {
           this._graphics.drawRect(x, y, 20, 20);
           break;
