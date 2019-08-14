@@ -8,11 +8,23 @@
     <title>Document</title>
     <style>
         html,
-        body,
-        #container,
-        #canvas {
+        body {
             height: 100%;
             width: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #container {
+            width: 90%;
+            height: 90%;
+
+            border: 1px solid black;
         }
     </style>
 </head>
@@ -73,7 +85,7 @@
             };
         }
 
-        const scaleFreeNetwork = getScaleFreeNetwork(20);
+        const scaleFreeNetwork = getScaleFreeNetwork(200);
 
         const graph = new VNetGraph(document.getElementById('container'), scaleFreeNetwork.nodes, scaleFreeNetwork
             .edges, {});

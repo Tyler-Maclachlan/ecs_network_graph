@@ -17,7 +17,7 @@ export default class ForceSystem {
   public theta: number = 0.5;
   // theta = number used for barnes hut condition (between 0 and 1) lower means more accurate but less performant and higher is less accurate but more performant
   private options = {
-    gravitationalConstant: 3000
+    gravitationalConstant: -2000
   };
 
   constructor(
@@ -34,11 +34,11 @@ export default class ForceSystem {
 
   public constructTree(bounds: Bounds, nodeManager: NodeManager) {
     const sizeX = bounds.right - bounds.left;
-    const sizeY = bounds.top - bounds.bottom;
+    const sizeY = bounds.bottom - bounds.top;
     const size = sizeX > sizeY ? sizeX : sizeY; // izza square now
     this.barnesHutTree = new QuadTree(
       new AABB(
-        { x: 0, y: 0 },
+        { x: bounds.left, y: bounds.top },
         {
           x: size,
           y: size
@@ -93,14 +93,12 @@ export default class ForceSystem {
           this.getForceContributions(node, pos, branch.BR)
         );
       } else {
-        branch.elements.forEach((_pos, _n) => {
-          if (!(_n.index === node.index && _n.generation === node.generation)) {
-            const _dx = _pos.x - pos.x;
-            const _dy = _pos.y - pos.y;
-            const d = Math.sqrt(_dx * _dx + _dy * _dy);
-            forces = addVecs(forces, this.calcForce(d, _dx, _dy, branch.mass));
-          }
-        });
+        if (!branch.elements.has(node)) {
+          forces = addVecs(
+            forces,
+            this.calcForce(distance, dx, dy, branch.mass)
+          );
+        }
       }
     }
 
@@ -113,8 +111,8 @@ export default class ForceSystem {
     dy: number,
     mass: number
   ): Vector2D {
-    if (distance < 1) {
-      distance = 1;
+    if (distance < 0.1) {
+      distance = 0.1;
       dx = distance;
     }
     const gravityForce =
@@ -145,8 +143,10 @@ export default class ForceSystem {
         this.barnesHutTree
       );
 
+      // console.log('before ', nodeForce);
       nodeForce.x += force.x;
       nodeForce.y += force.y;
+      // console.log('after ', nodeForce);
     }
   }
 }

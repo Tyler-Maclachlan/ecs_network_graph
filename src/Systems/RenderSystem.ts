@@ -16,31 +16,29 @@ import ShapeComponent from '../Components/ShapeComponent';
 import { QuadTree } from '../Utils';
 
 export default class RenderSystem {
+  public _canvasContainer: HTMLElement;
   public _canvas: HTMLCanvasElement;
   public _renderer: Renderer;
-  public _container: Container;
+  public _graphicsContainer: Container;
   private _nodesContainer: Container;
   private _edgesContainer: Container;
   private _ticker: Ticker;
   public _graphics: Graphics;
 
-  constructor(canvas: HTMLElement) {
+  constructor(container: HTMLElement) {
     // Create renderer and keep reference to canvas
     this._renderer = autoDetectRenderer({
-      height: canvas.clientHeight,
-      width: canvas.clientWidth,
+      height: container.clientHeight,
+      width: container.clientWidth,
       autoDensity: true,
       transparent: true,
       antialias: true,
       resolution: window.devicePixelRatio
     });
 
-    document.getElementById('container').appendChild(this._renderer.view);
+    this._canvasContainer = container;
     this._canvas = this._renderer.view;
-
-    this._renderer.plugins.interaction.on('click', (e: any) => {
-      console.log(e);
-    });
+    this._canvasContainer.appendChild(this._renderer.view);
 
     // Create ticker and graphics
     this._ticker = new Ticker();
@@ -50,7 +48,9 @@ export default class RenderSystem {
         Create global container
         Panning will be done on this container
     */
-    this._container = new Container();
+    this._graphicsContainer = new Container();
+    this._graphicsContainer.interactive = true;
+    this._graphicsContainer.buttonMode = true;
 
     // Create Node container
     this._nodesContainer = new Container();
@@ -63,17 +63,15 @@ export default class RenderSystem {
     this._edgesContainer.buttonMode = true;
 
     // Add Node and Edge containers to global container
-    this._container.addChild(this._nodesContainer);
-    this._container.addChild(this._edgesContainer);
-    this._container.addChild(this._graphics);
-
-    console.log('canvas: ', this._canvas);
+    this._graphicsContainer.addChild(this._nodesContainer);
+    this._graphicsContainer.addChild(this._edgesContainer);
+    this._graphicsContainer.addChild(this._graphics);
 
     window.addEventListener('resize', this._onResize.bind(this));
   }
 
   public getBounds(): Bounds {
-    const { left, right, top, bottom } = this._container.getBounds();
+    const { left, right, top, bottom } = this._graphicsContainer.getBounds();
     return { left, right, top, bottom };
   }
 
@@ -86,6 +84,7 @@ export default class RenderSystem {
     const edges = edgeManager.edges;
     const nodes = nodeManager.nodes;
     const springs = edgeManager.getComponentsOfType(SpringComponent);
+
     const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
     const shapes = nodeManager.getComponentsOfType(ShapeComponent);
 
@@ -94,7 +93,17 @@ export default class RenderSystem {
     let i;
     this._graphics.clear();
 
+    // draw nodes
+    this._graphics.beginFill(0x0033ff, 1);
+    this._graphics.lineStyle(0);
+    for (i = 0; i < nLen; i++) {
+      const node = nodes[i];
+      const { x, y } = nodePositions[node.index];
+      this._graphics.drawRect(x - 10, y - 10, 20, 20);
+    }
+
     // draw edges
+    this._graphics.beginFill(0xff0000, 1);
     this._graphics.lineStyle(1, 0xff0000, 1);
     for (i = 0; i < eLen; i++) {
       const edge = edges[i];
@@ -109,21 +118,31 @@ export default class RenderSystem {
       );
     }
 
-    // draw nodes
-    this._graphics.beginFill(0x0033ff, 1);
-    this._graphics.lineStyle(0);
-    for (i = 0; i < nLen; i++) {
-      const node = nodes[i];
-      const { x, y } = nodePositions[node.index];
-      this._graphics.drawRect(x - 10, y - 10, 20, 20);
-    }
-
     // this._graphics.beginFill(0x0033ff, 0);
     // this._graphics.lineStyle(1, 0x00ff00);
 
-    // debug draw tree
+    // debug draw barnes hut tree
     if (debug) {
+      let i = -1;
+      const colors = [
+        '#79baf2',
+        '#7b9686',
+        '#3c4dff',
+        '#dd703e',
+        '#ce67ea',
+        '#da0c3d',
+        '#8c2496',
+        '#9098ad',
+        '#f1460b',
+        '#EDFFAB',
+        '#FDB833',
+        '#3BC14A'
+      ];
       const renderTree = (branch: QuadTree) => {
+        i++;
+        if (i >= colors.length) {
+          i = 0;
+        }
         if (branch.divided) {
           renderTree(branch.TL);
           renderTree(branch.TR);
@@ -131,15 +150,24 @@ export default class RenderSystem {
           renderTree(branch.BR);
         }
         this._graphics.beginFill(0x0033ff, 0);
-        this._graphics.lineStyle(1, 0x00ff00);
+        this._graphics.lineStyle(
+          1,
+          parseInt(colors[i].toLowerCase().replace('#', '0x'), 16)
+        );
         this._graphics.drawRect(
           branch.bounds.position.x,
           branch.bounds.position.y,
           branch.bounds.size.x,
           branch.bounds.size.y
         );
-        this._graphics.beginFill(0x00ff33, 1);
-        this._graphics.lineStyle(1, 0x00ff00);
+        this._graphics.beginFill(
+          parseInt(colors[i].toLowerCase().replace('#', '0x'), 16),
+          1
+        );
+        this._graphics.lineStyle(
+          1,
+          parseInt(colors[i].toLowerCase().replace('#', '0x'), 16)
+        );
         this._graphics.drawCircle(
           branch.centerOfMass.x,
           branch.centerOfMass.y,
@@ -150,13 +178,13 @@ export default class RenderSystem {
       renderTree(tree);
     }
 
-    this._renderer.render(this._container);
+    this._renderer.render(this._graphicsContainer);
   }
 
   private _onResize() {
     this._renderer.resize(
-      this._canvas.parentElement.clientWidth,
-      this._canvas.parentElement.clientHeight
+      this._canvasContainer.clientWidth,
+      this._canvasContainer.clientHeight
     );
   }
 }

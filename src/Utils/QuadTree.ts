@@ -3,7 +3,7 @@ import { GenerationalIndex as Entity, AABB } from '.';
 
 export default class QuadTree {
   static MaxElements = 4;
-  static MaxDepth = 10;
+  static MaxDepth = 100;
 
   public bounds: AABB;
   public depth: number;
@@ -32,69 +32,58 @@ export default class QuadTree {
       return false;
     } else if (
       this.depth === QuadTree.MaxDepth ||
-      (!this.divided && this.elements.size < QuadTree.MaxElements)
+      (!this.divided && this.elements.size === 0)
     ) {
       this.elements.set(node, position);
-      this.mass++;
-
-      // calculate center of mass after adding new node
-      const massInv = 1 / this.mass;
-      this.centerOfMass.x = this.centerOfMass.x * this.mass + position.x;
-      this.centerOfMass.x *= massInv;
-      this.centerOfMass.y = this.centerOfMass.y * this.mass + position.y;
-      this.centerOfMass.y *= massInv;
+      this.updateMass(position, 1);
       return true;
     } else {
       if (!this.divided) {
         this.divide();
       }
 
-      const inserted =
+      return (
         this.TL.insert(node, position) ||
         this.TR.insert(node, position) ||
         this.BL.insert(node, position) ||
-        this.BR.insert(node, position);
-
-      // if (inserted) {
-      //   this.mass++;
-      // }
-
-      return inserted;
+        this.BR.insert(node, position)
+      );
     }
+  }
+
+  public updateMass(pos: Vector2D, mass: number) {
+    let com = this.centerOfMass;
+    let totalMass = this.mass + mass;
+    let totalMassInv = 1 / totalMass;
+
+    com.x = com.x * this.mass + pos.x * mass;
+    com.x *= totalMassInv;
+
+    com.y = com.y * this.mass + pos.y * mass;
+    com.y *= totalMassInv;
+
+    this.mass = totalMass;
   }
 
   // divide tree into 4 branches and recursively insert current elements into branches
   public divide() {
     const hw = this.bounds.halfWidth;
     const hh = this.bounds.halfHeight;
+    const newDepth = this.depth + 1;
+    const { x, y } = this.bounds.position;
 
-    this.TL = new QuadTree(
-      new AABB(
-        { x: this.bounds.position.x, y: this.bounds.position.y },
-        { x: hw, y: hh }
-      ),
-      this.depth + 1
-    );
+    this.TL = new QuadTree(new AABB({ x, y }, { x: hw, y: hh }), newDepth);
     this.TR = new QuadTree(
-      new AABB(
-        { x: this.bounds.position.x + hw, y: this.bounds.position.y },
-        { x: hw, y: hh }
-      ),
-      this.depth + 1
+      new AABB({ x: x + hw, y }, { x: hw, y: hh }),
+      newDepth
     );
     this.BL = new QuadTree(
-      new AABB(
-        { x: this.bounds.position.x, y: this.bounds.position.y + hh },
-        { x: hw, y: hh }
-      ),
-      this.depth + 1
+      new AABB({ x, y: y + hh }, { x: hw, y: hh }),
+      newDepth
     );
     this.BR = new QuadTree(
-      new AABB(
-        { x: this.bounds.position.x + hw, y: this.bounds.position.y + hh },
-        { x: hw, y: hh }
-      ),
-      this.depth + 1
+      new AABB({ x: x + hw, y: y + hh }, { x: hw, y: hh }),
+      newDepth
     );
 
     this.elements.forEach((pos, node) => {

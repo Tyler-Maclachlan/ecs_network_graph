@@ -10,12 +10,14 @@ import AccelerationComponent from './Components/AccelerationComponent';
 import CentralGravity from './Systems/CentralGravity';
 import VelocityVerlet from './Systems/VelocityVerlet';
 import ForceComponent from './Components/ForceComponent';
+import InputSystem from './Systems/InputSystem';
 
 export default class VNetGraph {
   private _renderer: RenderSystem;
   private _nodeManager: NodeManager;
   private _edgeManager: EdgeManager;
   private _forceSystem: ForceSystem;
+  private _inputSytem: InputSystem;
   private _runs = 0;
   private _worldBounds: Bounds;
 
@@ -61,7 +63,9 @@ export default class VNetGraph {
       },
       this._nodeManager,
       0.5,
-      {}
+      {
+        gravitationalConstant: -30000
+      }
     );
 
     this._worldBounds = {
@@ -70,6 +74,8 @@ export default class VNetGraph {
       bottom: this._renderer._canvas.height,
       right: this._renderer._canvas.width
     };
+
+    this._inputSytem = new InputSystem(this._renderer);
   }
 
   private _updateWorldBounds() {
@@ -98,15 +104,19 @@ export default class VNetGraph {
   }
 
   private _update() {
-    if (this._runs < 1000) {
-      this._runs++;
-      requestAnimationFrame(() => {
-        this._update();
-      });
-    }
-    console.log('run: ', this._runs);
+    // if (this._runs < 1000) {
+    //   this._runs++;
+    //   requestAnimationFrame(() => {
+    //     this._update();
+    //   });
+    // }
+    requestAnimationFrame(() => {
+      this._update();
+    });
+    // console.log('run: ', this._runs);
     console.time('physics');
     this._updateWorldBounds();
+    // console.log(this._worldBounds);
     CentralGravity(this._nodeManager, {
       x: this._renderer._canvas.width / 2,
       y: this._renderer._canvas.height / 2
@@ -120,7 +130,7 @@ export default class VNetGraph {
       this._edgeManager,
       this._nodeManager,
       this._forceSystem.barnesHutTree,
-      true
+      false
     );
     console.timeEnd('render');
   }

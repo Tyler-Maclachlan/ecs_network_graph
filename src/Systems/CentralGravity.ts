@@ -33,7 +33,7 @@ function calcForce(distance: number, dx: number, dy: number, mass: number) {
     distance = 0.1;
     dx = distance;
   }
-  const gravityForce = 0.3 / distance;
+  const gravityForce = (0.3 * mass) / distance;
   return {
     x: gravityForce * dx,
     y: gravityForce * dy
