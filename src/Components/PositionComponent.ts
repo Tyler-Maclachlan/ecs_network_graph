@@ -1,7 +1,6 @@
-import { Component } from '../types';
+import { Component } from './Component';
 
-export default class PositionComponent implements Component {
-  readonly name = 'position';
+export default class PositionComponent extends Component {
   public x: number = 0;
   public y: number = 0;
 }

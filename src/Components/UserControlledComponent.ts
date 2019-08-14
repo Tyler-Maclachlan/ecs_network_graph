@@ -1,6 +1,5 @@
-import { Component } from '../types';
+import { Component } from './Component';
 
-export default class UserControlledComponent implements Component {
-  name: 'usercontrolled';
+export default class UserControlledComponent extends Component {
   isControlled: boolean = false;
 }

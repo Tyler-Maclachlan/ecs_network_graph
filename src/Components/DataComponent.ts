@@ -1,6 +1,5 @@
-import { Component } from '../types';
+import { Component } from './Component';
 
-export default class DataComponent implements Component {
-  readonly name = 'data';
+export default class DataComponent extends Component {
   public data: { [key: string]: any } = {};
 }

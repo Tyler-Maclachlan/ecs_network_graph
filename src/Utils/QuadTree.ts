@@ -3,7 +3,7 @@ import { GenerationalIndex as Entity, AABB } from '.';
 
 export default class QuadTree {
   static MaxElements = 4;
-  static MaxDepth = 8;
+  static MaxDepth = 10;
 
   public bounds: AABB;
   public depth: number;
@@ -24,7 +24,7 @@ export default class QuadTree {
     this.divided = false;
     this.elements = new Map();
     this.mass = 0;
-    this.centerOfMass = { x: bounds.size.x / 2, y: bounds.size.y / 2 };
+    this.centerOfMass = { x: 0, y: 0 };
   }
 
   public insert(node: Entity, position: Vector2D): boolean {
@@ -55,9 +55,9 @@ export default class QuadTree {
         this.BL.insert(node, position) ||
         this.BR.insert(node, position);
 
-      if (inserted) {
-        this.mass++;
-      }
+      // if (inserted) {
+      //   this.mass++;
+      // }
 
       return inserted;
     }
@@ -65,26 +65,26 @@ export default class QuadTree {
 
   // divide tree into 4 branches and recursively insert current elements into branches
   public divide() {
-    const hw = this.bounds.size.x / 2;
-    const hh = this.bounds.size.y / 2;
+    const hw = this.bounds.halfWidth;
+    const hh = this.bounds.halfHeight;
 
     this.TL = new QuadTree(
       new AABB(
-        { x: this.bounds.position.x - hw, y: this.bounds.position.y - hh },
+        { x: this.bounds.position.x, y: this.bounds.position.y },
         { x: hw, y: hh }
       ),
       this.depth + 1
     );
     this.TR = new QuadTree(
       new AABB(
-        { x: this.bounds.position.x + hw, y: this.bounds.position.y - hh },
+        { x: this.bounds.position.x + hw, y: this.bounds.position.y },
         { x: hw, y: hh }
       ),
       this.depth + 1
     );
     this.BL = new QuadTree(
       new AABB(
-        { x: this.bounds.position.x - hw, y: this.bounds.position.y + hh },
+        { x: this.bounds.position.x, y: this.bounds.position.y + hh },
         { x: hw, y: hh }
       ),
       this.depth + 1

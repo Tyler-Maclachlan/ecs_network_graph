@@ -7,13 +7,8 @@ import SpringComponent from '../Components/SpringComponent';
 import LabelComponent from '../Components/LabelComponent';
 import ColorComponent from '../Components/ColorComponent';
 import DataComponent from '../Components/DataComponent';
-import {
-  Newable,
-  Component,
-  EdgeComponents,
-  EdgeComponent,
-  EdgeOptions
-} from '../types';
+import { Newable, EdgeComponents, EdgeComponent, EdgeOptions } from '../types';
+import { Component } from '../Components/Component';
 
 export default class EdgeManager {
   private _allocator: EntityAllocator;
@@ -32,23 +27,24 @@ export default class EdgeManager {
     this.edges.push(_edge);
 
     // Create components
-    this.addComponent(_edge, new SpringComponent());
-    this.addComponent(_edge, new LabelComponent());
-    this.addComponent(_edge, new ColorComponent());
-    this.addComponent(_edge, new DataComponent());
+    const _spring = this.addComponent(_edge, new SpringComponent());
+    const _label = this.addComponent(_edge, new LabelComponent());
+    const _color = this.addComponent(_edge, new ColorComponent());
+    const _data = this.addComponent(_edge, new DataComponent());
 
     // Set component data
-    const _spring = this.getComponent<SpringComponent>(_edge, SpringComponent)!;
     _spring.from = from;
     _spring.to = to;
 
-    const _label = this.getComponent<LabelComponent>(_edge, LabelComponent)!;
-    _label.text = label.text;
-    _label.alignment = label.alignment;
+    if (label) {
+      _label.text = label.text || _label.text;
+      _label.alignment = label.alignment || _label.alignment;
+    }
 
-    const _color = this.getComponent<ColorComponent>(_edge, ColorComponent)!;
-    _color.fillColor = color.fillColor;
-    _color.textColor = color.textColor;
+    if (color) {
+      _color.fillColor = color.fillColor || _color.fillColor;
+      _color.textColor = color.textColor || _color.textColor;
+    }
   }
 
   public deleteEdge(edge: Entity): boolean {
@@ -65,7 +61,7 @@ export default class EdgeManager {
   }
 
   public addComponent<T extends Component>(edge: Entity, component: T): T {
-    const componentName = component.name;
+    const componentName = component.constructor.name;
 
     let store = this._componentStores.get(componentName);
 
@@ -80,7 +76,7 @@ export default class EdgeManager {
 
   public removeComponent<T extends Component>(
     edge: Entity,
-    component: T
+    component: Newable<T>
   ): boolean {
     const store = this._componentStores.get(component.name);
 

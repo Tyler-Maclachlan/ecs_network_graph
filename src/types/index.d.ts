@@ -1,22 +1,18 @@
-import SpringComponent from './Components/SpringComponent';
-import LabelComponent from './Components/LabelComponent';
-import ColorComponent from './Components/ColorComponent';
-import DataComponent from './Components/DataComponent';
+import SpringComponent from '../Components/SpringComponent';
+import LabelComponent from '../Components/LabelComponent';
+import ColorComponent from '../Components/ColorComponent';
+import DataComponent from '../Components/DataComponent';
 import {
   GenerationalIndexAllocator as EntityAllocator,
   GenerationalIndexArray as EntityMap,
   GenerationalIndex as Entity
-} from './Utils/index';
-import ShapeComponent from './Components/ShapeComponent';
-import PositionComponent from './Components/PositionComponent';
-import SizeComponent from './Components/SizeComponent';
-import VelocityComponent from './Components/VelocityComponent';
-import ImageComponent from './Components/ImageComponent';
-import AccelerationComponent from './Components/AccelerationComponent';
-
-interface Component {
-  readonly name: string;
-}
+} from '../Utils/index';
+import ShapeComponent from '../Components/ShapeComponent';
+import PositionComponent from '../Components/PositionComponent';
+import SizeComponent from '../Components/SizeComponent';
+import VelocityComponent from '../Components/VelocityComponent';
+import ImageComponent from '../Components/ImageComponent';
+import AccelerationComponent from '../Components/AccelerationComponent';
 
 type Newable<T> = { new (...args: any[]): T };
 

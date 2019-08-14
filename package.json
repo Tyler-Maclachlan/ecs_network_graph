@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "dev": "webpack --watch"
+    "dev": "clear && webpack --watch"
   },
   "devDependencies": {
     "ts-loader": "^6.0.4",

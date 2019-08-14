@@ -1,7 +1,6 @@
-import { Component } from '../types';
+import { Component } from './Component';
 
-export default class SizeComponent implements Component {
-  readonly name = 'size';
+export default class SizeComponent extends Component {
   height: number = 20;
   width: number = 20;
 }

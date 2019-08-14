@@ -1,8 +1,7 @@
 import { GenerationalIndex as Entity } from '../Utils/index';
-import { Component } from '../types';
+import { Component } from './Component';
 
-export default class SpringComponent implements Component {
-  readonly name = 'spring';
+export default class SpringComponent extends Component {
   public from: Entity;
   public to: Entity;
 }

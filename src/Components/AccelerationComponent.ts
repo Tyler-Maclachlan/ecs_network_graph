@@ -1,7 +1,6 @@
-import { Component } from '../types';
+import { Component } from './Component';
 
-export default class AccelerationComponent implements Component {
-  readonly name = 'acceleration';
+export default class AccelerationComponent extends Component {
   public x: number = 0;
   public y: number = 0;
 }

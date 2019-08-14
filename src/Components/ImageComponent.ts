@@ -1,6 +1,5 @@
-import { Component } from '../types';
+import { Component } from './Component';
 
-export default class ImageComponent implements Component {
-  readonly name = 'image';
+export default class ImageComponent extends Component {
   public image: string = '';
 }

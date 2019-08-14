@@ -9,6 +9,22 @@ export default class AABB {
     this.size = size;
   }
 
+  get halfWidth() {
+    return this.size.x / 2;
+  }
+
+  get halfHeight() {
+    return this.size.y / 2;
+  }
+
+  get horizontalMidpoint() {
+    return this.position.x + this.halfWidth;
+  }
+
+  get verticalMidpoint() {
+    return this.position.y + this.halfHeight;
+  }
+
   public overlapsVec(vec: Vector2D): boolean {
     return (
       this.position.x - this.size.x <= vec.x &&

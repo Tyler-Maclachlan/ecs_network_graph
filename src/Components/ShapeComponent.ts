@@ -1,6 +1,6 @@
-import { Component, Shape } from '../types';
+import { Component } from './Component';
+import { Shape } from '../types';
 
-export default class ShapeComponent implements Component {
-  readonly name = 'shape';
+export default class ShapeComponent extends Component {
   public shape: Shape = 'rectangle';
 }

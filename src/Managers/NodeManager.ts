@@ -13,8 +13,10 @@ import ColorComponent from '../Components/ColorComponent';
 import ImageComponent from '../Components/ImageComponent';
 import DataComponent from '../Components/DataComponent';
 import AccelerationComponent from '../Components/AccelerationComponent';
-import { Component, Newable, NodeOptions } from '../types';
+import { Newable, NodeOptions } from '../types';
+import { Component } from '../Components/Component';
 import UserControlledComponent from '../Components/UserControlledComponent';
+import ForceComponent from '../Components/ForceComponent';
 
 export default class NodeManager {
   private _allocator: EntityAllocator;
@@ -33,7 +35,7 @@ export default class NodeManager {
 
   public createNode(options: NodeOptions) {
     let { id, shape, color, size, label, data } = options;
-    if (!id) {
+    if (id === null || id === undefined) {
       id = uuid();
     }
     if (this._idToEntityMap.has(id)) {
@@ -46,9 +48,13 @@ export default class NodeManager {
 
     //Create components
     // Mandatory components
-    this.addComponent(_node, new PositionComponent());
+    const pos = this.addComponent(_node, new PositionComponent());
     this.addComponent(_node, new VelocityComponent());
     this.addComponent(_node, new AccelerationComponent());
+    this.addComponent(_node, new ForceComponent());
+
+    pos.x = 20 + Math.random() * 1130;
+    pos.y = 20 + Math.random() * 944;
 
     //Components that can have values in 'options'
     const colorComponent = this.addComponent(_node, new ColorComponent());
@@ -63,7 +69,7 @@ export default class NodeManager {
       shapeComponent.shape = shape;
     }
 
-    if (size.height && size.width) {
+    if (size) {
       sizeComponent.height = size.height || sizeComponent.height;
       sizeComponent.width = size.width || sizeComponent.width;
     }
@@ -92,7 +98,7 @@ export default class NodeManager {
   }
 
   public addComponent<T extends Component>(node: Entity, component: T): T {
-    const componentName = component.name;
+    const componentName = component.constructor.name;
 
     let store = this._componentStores.get(componentName);
 
@@ -108,7 +114,7 @@ export default class NodeManager {
 
   public removeComponent<T extends Component>(
     node: Entity,
-    component: T
+    component: Newable<T>
   ): boolean {
     const store = this._componentStores.get(component.name);
     if (store && store.has(node)) {

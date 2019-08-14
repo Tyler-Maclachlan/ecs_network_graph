@@ -10,13 +10,14 @@ import { Bounds, Vector2D, Options } from '../types';
 import PositionComponent from '../Components/PositionComponent';
 import AccelerationComponent from '../Components/AccelerationComponent';
 import VelocityComponent from '../Components/VelocityComponent';
+import ForceComponent from '../Components/ForceComponent';
 
 export default class ForceSystem {
   public barnesHutTree: QuadTree;
-  public theta: number;
+  public theta: number = 0.5;
   // theta = number used for barnes hut condition (between 0 and 1) lower means more accurate but less performant and higher is less accurate but more performant
-  private options: {
-    gravitationalConstant: number;
+  private options = {
+    gravitationalConstant: 3000
   };
 
   constructor(
@@ -25,18 +26,22 @@ export default class ForceSystem {
     theta: number,
     options: Options
   ) {
-    this.theta = theta;
-    this.options.gravitationalConstant = options.gravitationalConstant;
+    this.theta = theta || this.theta;
+    this.options.gravitationalConstant =
+      options.gravitationalConstant || this.options.gravitationalConstant;
     this.constructTree(bounds, nodeManager);
   }
 
   public constructTree(bounds: Bounds, nodeManager: NodeManager) {
+    const sizeX = bounds.right - bounds.left;
+    const sizeY = bounds.top - bounds.bottom;
+    const size = sizeX > sizeY ? sizeX : sizeY; // izza square now
     this.barnesHutTree = new QuadTree(
       new AABB(
         { x: 0, y: 0 },
         {
-          x: Math.abs(bounds.right - bounds.left),
-          y: Math.abs(bounds.top - bounds.bottom)
+          x: size,
+          y: size
         }
       )
     );
@@ -57,6 +62,7 @@ export default class ForceSystem {
     branch: QuadTree
   ): Vector2D {
     let forces: Vector2D = { x: 0, y: 0 };
+
     if (branch.divided || branch.elements.size) {
       const dx = branch.centerOfMass.x - pos.x;
       const dy = branch.centerOfMass.y - pos.y;
@@ -66,7 +72,8 @@ export default class ForceSystem {
         branch.bounds.size.x > branch.bounds.size.y
           ? branch.bounds.size.x
           : branch.bounds.size.y;
-      if (s / distance < this.theta) {
+      const sd = s / distance;
+      if (sd < this.theta) {
         forces = addVecs(forces, this.calcForce(distance, dx, dy, branch.mass));
       } else if (branch.divided) {
         forces = addVecs(
@@ -87,11 +94,11 @@ export default class ForceSystem {
         );
       } else {
         branch.elements.forEach((_pos, _n) => {
-          if (_n.index !== node.index && _n.generation !== node.generation) {
+          if (!(_n.index === node.index && _n.generation === node.generation)) {
             const _dx = _pos.x - pos.x;
             const _dy = _pos.y - pos.y;
             const d = Math.sqrt(_dx * _dx + _dy * _dy);
-            forces = addVecs(forces, this.calcForce(d, _dx, _dy, 1));
+            forces = addVecs(forces, this.calcForce(d, _dx, _dy, branch.mass));
           }
         });
       }
@@ -106,60 +113,40 @@ export default class ForceSystem {
     dy: number,
     mass: number
   ): Vector2D {
-    if (distance < 0.1) {
-      distance = 0.1;
+    if (distance < 1) {
+      distance = 1;
       dx = distance;
     }
-
     const gravityForce =
-      (this.options.gravitationalConstant * mass) / Math.pow(distance, 3);
-    return {
+      (this.options.gravitationalConstant * mass) /
+      (distance * distance * distance);
+
+    const force = {
       x: dx * gravityForce,
       y: dy * gravityForce
     };
+    return force;
   }
 
   public update(bounds: Bounds, nodeManager: NodeManager) {
     const nodes = nodeManager.nodes;
     const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
-    const nodeVelocities = nodeManager.getComponentsOfType(VelocityComponent);
-    const nodeAccelerations = nodeManager.getComponentsOfType(
-      AccelerationComponent
-    );
+    const nodeForces = nodeManager.getComponentsOfType(ForceComponent);
     this.constructTree(bounds, nodeManager);
     const nLen = nodes.length;
     for (let i = 0; i < nLen; i++) {
       const node = nodes[i];
-      const nodeAcc = nodeAccelerations[node.index];
-      const nodeVel = nodeVelocities[node.index];
       const nodePos = nodePositions[node.index];
+      const nodeForce = nodeForces[node.index];
 
       const force = this.getForceContributions(
         node,
         nodePos,
         this.barnesHutTree
       );
-      let acc = addVecs(nodeAcc, force);
 
-      let vel = addVecs(nodeVel, acc);
-      nodePos.x += vel.x;
-      nodePos.y += vel.y;
-
-      vel = multiplyVecByScalar(vel, 0.7);
-      acc = multiplyVecByScalar(acc, 0.3);
-
-      nodeVel.x = vel.x;
-      nodeVel.y = vel.y;
-
-      if (Math.abs(acc.x) < 0.001) {
-        acc.x = 0;
-      }
-      if (Math.abs(acc.y) < 0.001) {
-        acc.y = 0;
-      }
-
-      nodeAcc.x = acc.x;
-      nodeAcc.y = acc.y;
+      nodeForce.x += force.x;
+      nodeForce.y += force.y;
     }
   }
 }

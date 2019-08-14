@@ -5,6 +5,7 @@ import VelocityComponent from '../Components/VelocityComponent';
 import AccelerationComponent from '../Components/AccelerationComponent';
 import SpringComponent from '../Components/SpringComponent';
 import { getDistanceBetweenVecs, normalizeVec, subVecs } from '../Utils/index';
+import ForceComponent from '../Components/ForceComponent';
 
 export function SpringSystem(
   edgeManager: EdgeManager,
@@ -15,14 +16,14 @@ export function SpringSystem(
     restDistance: number;
   }
 ) {
-  const stiffness = (options && options.stiffness) || 10;
-  const damping = (options && options.damping) || 0.03;
-  const restDistance = (options && options.restDistance) || 200;
+  const stiffness = (options && options.stiffness) || 20;
+  const damping = (options && options.damping) || 0.003;
+  const restDistance = (options && options.restDistance) || 150;
 
   const edges = edgeManager.getComponentsOfType(SpringComponent);
   const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
   const nodeVels = nodeManager.getComponentsOfType(VelocityComponent);
-  const nodeAccs = nodeManager.getComponentsOfType(AccelerationComponent);
+  const nodeForces = nodeManager.getComponentsOfType(ForceComponent);
   const numEdges = edges.length;
 
   for (let i = 0; i < numEdges; i++) {
@@ -30,11 +31,11 @@ export function SpringSystem(
 
     let node1pos = nodePositions[_edge.from.index];
     let node1vel = nodeVels[_edge.from.index];
-    let node1acc = nodeAccs[_edge.from.index];
+    let node1force = nodeForces[_edge.from.index];
 
     let node2pos = nodePositions[_edge.to.index];
     let node2vel = nodeVels[_edge.to.index];
-    let node2acc = nodeAccs[_edge.to.index];
+    let node2force = nodeForces[_edge.to.index];
 
     let distance = getDistanceBetweenVecs(node1pos!, node2pos!);
     distance = distance >= 1 ? distance : 1;
@@ -53,10 +54,10 @@ export function SpringSystem(
     const fx2 = stiffnessXd * (norm2.x / distance) - damping * v2.x;
     const fy2 = stiffnessXd * (norm2.y / distance) - damping * v2.y;
 
-    node1acc.x += fx1;
-    node1acc.y += fy1;
+    node1force.x += fx1;
+    node1force.y += fy1;
 
-    node2acc.x += fx2;
-    node2acc.y += fy2;
+    node2force.x += fx2;
+    node2force.y += fy2;
   }
 }

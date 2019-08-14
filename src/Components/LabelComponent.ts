@@ -1,7 +1,6 @@
-import { Component } from '../types';
+import { Component } from './Component';
 
-export default class LabelComponent implements Component {
-  readonly name = 'label';
+export default class LabelComponent extends Component {
   public text: string = '';
   public alignment: 'top' | 'middle' | 'bottom' | 'left' | 'right' = 'bottom';
 }
