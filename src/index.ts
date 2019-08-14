@@ -62,7 +62,7 @@ export default class VNetGraph {
         right: this._renderer._canvas.width
       },
       this._nodeManager,
-      0.5,
+      0.7,
       {
         gravitationalConstant: -30000
       }

@@ -30,7 +30,7 @@ export default function VelocityVerlet(nodeManager: NodeManager, dt: number) {
 }
 
 function calculateVelocity(velocity: number, force: number, mass: number) {
-  const dampingForce = 0.5 * velocity;
+  const dampingForce = 0.9 * velocity;
   let a = (force - dampingForce) / mass;
   velocity += a;
 

@@ -93,15 +93,6 @@ export default class RenderSystem {
     let i;
     this._graphics.clear();
 
-    // draw nodes
-    this._graphics.beginFill(0x0033ff, 1);
-    this._graphics.lineStyle(0);
-    for (i = 0; i < nLen; i++) {
-      const node = nodes[i];
-      const { x, y } = nodePositions[node.index];
-      this._graphics.drawRect(x - 10, y - 10, 20, 20);
-    }
-
     // draw edges
     this._graphics.beginFill(0xff0000, 1);
     this._graphics.lineStyle(1, 0xff0000, 1);
@@ -116,6 +107,15 @@ export default class RenderSystem {
         nodePositions[spring.to.index].x,
         nodePositions[spring.to.index].y
       );
+    }
+
+    // draw nodes
+    this._graphics.beginFill(0x0033ff, 1);
+    this._graphics.lineStyle(0);
+    for (i = 0; i < nLen; i++) {
+      const node = nodes[i];
+      const { x, y } = nodePositions[node.index];
+      this._graphics.drawRect(x - 10, y - 10, 20, 20);
     }
 
     // this._graphics.beginFill(0x0033ff, 0);
