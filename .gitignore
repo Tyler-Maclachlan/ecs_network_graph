@@ -88,4 +88,4 @@ typings/
 .dynamodb/
 
 # Dist files
-dist/
+# dist/
