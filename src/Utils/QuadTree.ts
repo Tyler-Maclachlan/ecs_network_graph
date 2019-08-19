@@ -97,17 +97,14 @@ export default class QuadTree {
     this.divided = true;
   }
 
-  public query(
-    area: AABB,
-    out: Map<Entity, Vector2D> = new Map()
-  ): Map<Entity, Vector2D> {
+  public query(area: AABB, out: Entity[] = []): Entity[] {
     if (!this.bounds.overlapsAABB(area)) {
       return out;
     } else {
       if (!this.divided) {
         this.elements.forEach((pos, node) => {
           if (area.overlapsVec(pos)) {
-            out.set(node, pos);
+            out.push(node);
           }
         });
       } else {

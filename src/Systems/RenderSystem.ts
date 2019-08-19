@@ -14,6 +14,7 @@ import EdgeManager from '../Managers/EdgeManager';
 import NodeManager from '../Managers/NodeManager';
 import ShapeComponent from '../Components/ShapeComponent';
 import { QuadTree } from '../Utils';
+import LabelComponent from '../Components/LabelComponent';
 
 export default class RenderSystem {
   public _canvasContainer: HTMLElement;
@@ -63,9 +64,9 @@ export default class RenderSystem {
     this._edgesContainer.buttonMode = true;
 
     // Add Node and Edge containers to global container
+    this._nodesContainer.addChild(this._graphics);
     this._graphicsContainer.addChild(this._nodesContainer);
     this._graphicsContainer.addChild(this._edgesContainer);
-    this._graphicsContainer.addChild(this._graphics);
 
     window.addEventListener('resize', this._onResize.bind(this));
   }
@@ -73,6 +74,25 @@ export default class RenderSystem {
   public getBounds(): Bounds {
     const { left, right, top, bottom } = this._graphicsContainer.getBounds();
     return { left, right, top, bottom };
+  }
+
+  public fitToScreen() {
+    // TODO: fix this
+    const renderBounds = this.getBounds();
+    const renderHeight = renderBounds.bottom - renderBounds.top;
+    const renderWidth = renderBounds.right - renderBounds.left;
+
+    const canvasHeight = this._canvasContainer.clientHeight;
+    const canvasWidth = this._canvasContainer.clientWidth;
+
+    const scaleX = canvasWidth / renderWidth;
+    const scaleY = canvasHeight / renderHeight;
+
+    const scale = scaleX > scaleY ? scaleY : scaleX;
+
+    this._graphics.scale.set(scale, scale);
+    this._graphics.updateTransform();
+    this._renderer.render(this._graphicsContainer);
   }
 
   public render(
@@ -84,8 +104,10 @@ export default class RenderSystem {
     const edges = edgeManager.edges;
     const nodes = nodeManager.nodes;
     const springs = edgeManager.getComponentsOfType(SpringComponent);
+    const edgeLabels = edgeManager.getComponentsOfType(LabelComponent);
 
     const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
+    const nodeLabels = nodeManager.getComponentsOfType(LabelComponent);
     const shapes = nodeManager.getComponentsOfType(ShapeComponent);
 
     const eLen = edges.length;
@@ -99,14 +121,10 @@ export default class RenderSystem {
     for (i = 0; i < eLen; i++) {
       const edge = edges[i];
       const spring = springs[edge.index];
-      this._graphics.moveTo(
-        nodePositions[spring.from.index].x,
-        nodePositions[spring.from.index].y
-      );
-      this._graphics.lineTo(
-        nodePositions[spring.to.index].x,
-        nodePositions[spring.to.index].y
-      );
+      const to = nodePositions[spring.to.index];
+      const from = nodePositions[spring.from.index];
+      this._graphics.moveTo(from.x, from.y);
+      this._graphics.lineTo(to.x, to.y);
     }
 
     // draw nodes
@@ -186,5 +204,7 @@ export default class RenderSystem {
       this._canvasContainer.clientWidth,
       this._canvasContainer.clientHeight
     );
+    this._graphics.updateTransform();
+    this._renderer.render(this._graphicsContainer);
   }
 }

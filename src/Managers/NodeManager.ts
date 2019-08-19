@@ -34,6 +34,10 @@ export default class NodeManager {
   }
 
   public createNode(options: NodeOptions) {
+    options.label = {
+      text: 'label',
+      alignment: 'bottom'
+    };
     let { id, shape, color, size, label, data } = options;
     if (id === null || id === undefined) {
       id = uuid();
@@ -52,6 +56,7 @@ export default class NodeManager {
     this.addComponent(_node, new VelocityComponent());
     this.addComponent(_node, new AccelerationComponent());
     this.addComponent(_node, new ForceComponent());
+    this.addComponent(_node, new UserControlledComponent());
 
     pos.x = 20 + Math.random() * 1130;
     pos.y = 20 + Math.random() * 944;
@@ -84,6 +89,7 @@ export default class NodeManager {
       const dataComponent = this.addComponent(_node, new DataComponent());
       dataComponent.data = data;
     }
+
     if (label) {
       const labelComponent = this.addComponent(_node, new LabelComponent());
       labelComponent.text = label.text;

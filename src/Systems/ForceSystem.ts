@@ -3,32 +3,25 @@ import {
   AABB,
   GenerationalIndex as Entity,
   addVecs,
-  multiplyVecByScalar
+  deepExtend
 } from '../Utils';
 import NodeManager from '../Managers/NodeManager';
 import { Bounds, Vector2D, Options } from '../types';
 import PositionComponent from '../Components/PositionComponent';
-import AccelerationComponent from '../Components/AccelerationComponent';
-import VelocityComponent from '../Components/VelocityComponent';
 import ForceComponent from '../Components/ForceComponent';
 
 export default class ForceSystem {
   public barnesHutTree: QuadTree;
-  public theta: number = 0.5;
+  private _nodeManager: NodeManager;
   // theta = number used for barnes hut condition (between 0 and 1) lower means more accurate but less performant and higher is less accurate but more performant
   private options = {
-    gravitationalConstant: -2000
+    gravitationalConstant: -2000,
+    theta: 0.5
   };
 
-  constructor(
-    bounds: Bounds,
-    nodeManager: NodeManager,
-    theta: number,
-    options: Options
-  ) {
-    this.theta = theta || this.theta;
-    this.options.gravitationalConstant =
-      options.gravitationalConstant || this.options.gravitationalConstant;
+  constructor(bounds: Bounds, nodeManager: NodeManager, options: Options) {
+    this._nodeManager = nodeManager;
+    this.options = deepExtend(this.options, options);
     this.constructTree(bounds, nodeManager);
   }
 
@@ -73,7 +66,7 @@ export default class ForceSystem {
           ? branch.bounds.size.x
           : branch.bounds.size.y;
       const sd = s / distance;
-      if (sd < this.theta) {
+      if (sd < this.options.theta) {
         forces = addVecs(forces, this.calcForce(distance, dx, dy, branch.mass));
       } else if (branch.divided) {
         forces = addVecs(
@@ -111,8 +104,8 @@ export default class ForceSystem {
     dy: number,
     mass: number
   ): Vector2D {
-    if (distance < 0.1) {
-      distance = 0.1;
+    if (distance < 1) {
+      distance = 1;
       dx = distance;
     }
     const gravityForce =
@@ -126,11 +119,13 @@ export default class ForceSystem {
     return force;
   }
 
-  public update(bounds: Bounds, nodeManager: NodeManager) {
-    const nodes = nodeManager.nodes;
-    const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
-    const nodeForces = nodeManager.getComponentsOfType(ForceComponent);
-    this.constructTree(bounds, nodeManager);
+  public update(bounds: Bounds) {
+    const nodes = this._nodeManager.nodes;
+    const nodePositions = this._nodeManager.getComponentsOfType(
+      PositionComponent
+    );
+    const nodeForces = this._nodeManager.getComponentsOfType(ForceComponent);
+    this.constructTree(bounds, this._nodeManager);
     const nLen = nodes.length;
     for (let i = 0; i < nLen; i++) {
       const node = nodes[i];
@@ -148,5 +143,10 @@ export default class ForceSystem {
       nodeForce.y += force.y;
       // console.log('after ', nodeForce);
     }
+  }
+
+  public getNodeAt(x: number, y: number) {
+    const bounds = new AABB({ x, y }, { x: 10, y: 10 });
+    return this.barnesHutTree.query(bounds);
   }
 }

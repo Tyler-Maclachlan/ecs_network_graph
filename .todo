@@ -15,45 +15,22 @@ ECS:
         physics:
             ✔ Spring @started(19-07-14 23:20) @done(19-07-14 23:22) @lasted(2m52s)
             ✔ Gravitational @started(19-07-17 15:41) @done(19-07-17 15:43) @lasted(2m23s)
-        ☐ user control
+        ✔ user control @done(19-08-15 15:46)
         cluster:
             ☐ Nodes
             ☐ Edges
     Systems:
         Rendering:
             ☐ Canvas
-            ☐ WebGL
+            ✔ WebGL @done(19-08-15 15:46)
         Physics:
-            ☐ Spring
-            ☐ Gravitational
+            ✔ Spring @done(19-08-15 15:46)
+            ✔ Gravitational @done(19-08-15 15:46)
         ☐ Clustering
         ☐ Styling
         Image:
             ☐ Loader
             ☐ Cache
-    Entities (Assemblages):
-        node:
-            ☐ position
-            physics:
-                ☐ gravitational
-            style:
-                ☐ images
-                ☐ shapes
-                ☐ text
-                ☐ colors
-            cluster:
-                ☐ nodes
-        edge:
-            ☐ node1
-            ☐ node2
-            physics:
-                ☐ spring
-        labels:
-            ☐ entityID
-            ☐ position
-            style:
-                ☐ text
-                ☐ colors
     Utilities:
         ✔ uuid @done(19-07-19 12:34)
         ✔ vector2d @done(19-07-19 13:04)

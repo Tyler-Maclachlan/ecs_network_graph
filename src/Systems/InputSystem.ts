@@ -1,27 +1,54 @@
-import { addWheelListener } from '../Utils';
+import { addWheelListener, GenerationalIndex as Entity } from '../Utils';
 import { Renderer, Graphics, interaction, Container } from 'pixi.js';
 import RenderSystem from './RenderSystem';
+import ForceSystem from './ForceSystem';
+import PositionComponent from '../Components/PositionComponent';
+import NodeManager from '../Managers/NodeManager';
+import UserControlledComponent from '../Components/UserControlledComponent';
 
 export default class InputSystem {
-  public graphRenderer: Renderer;
+  public graphContainer: HTMLElement;
   public graphGraphics: Graphics;
   public graphStage: Container;
   public isDragging = false;
+  public mouseDown = false;
+  public mousePos = {
+    x: 0,
+    y: 0
+  };
+  public mouseGraphPos = {
+    x: 0,
+    y: 0
+  };
+  public forceSystem: ForceSystem;
+  public nodeUnderMouse: {
+    node: Entity | null;
+    nodePos: PositionComponent | null;
+  } = {
+    node: null,
+    nodePos: null
+  };
 
-  constructor(renderer: RenderSystem) {
-    this.graphRenderer = renderer._renderer;
+  constructor(
+    renderer: RenderSystem,
+    forceSystem: ForceSystem,
+    nodeManager: NodeManager
+  ) {
+    this.graphContainer = renderer._canvasContainer;
     this.graphGraphics = renderer._graphics;
     this.graphStage = renderer._graphicsContainer;
+    this.forceSystem = forceSystem;
 
     addWheelListener(
       renderer._canvasContainer,
-      (e: any) => {
+      (e: MouseWheelEvent) => {
+        e.preventDefault();
         this.zoom(e.clientX, e.clientY, e.deltaY < 0);
       },
       false
     );
 
-    this.addPanning();
+    this.addPanning(nodeManager);
   }
 
   public getGraphCoordinates(x: number, y: number) {
@@ -56,41 +83,92 @@ export default class InputSystem {
     this.graphGraphics.updateTransform();
   }
 
-  public addPanning() {
-    console.log('add panning');
-    let stage = this.graphStage;
+  public addPanning(nodeManager: NodeManager) {
+    let container = this.graphContainer;
 
-    stage.interactive = true;
+    let prevX: number, prevY: number;
 
-    let isDragging = false,
-      prevX: number,
-      prevY: number;
+    container.addEventListener('pointerdown', (event: MouseEvent) => {
+      this.isDragging = true;
+      this.mouseDown = true;
+      prevX = event.pageX - container.offsetLeft;
+      prevY = event.pageY - container.offsetTop;
+      this.mousePos = {
+        x: prevX,
+        y: prevY
+      };
+      this.mouseGraphPos = this.getGraphCoordinates(prevX, prevY);
 
-    stage.on('pointerdown', (moveData: interaction.InteractionEvent) => {
-      console.log('pointerdown');
-      let pos = moveData.data.global;
-      prevX = pos.x;
-      prevY = pos.y;
-      isDragging = true;
-    });
+      const nodesUnderMouse = this.forceSystem.getNodeAt(
+        this.mouseGraphPos.x,
+        this.mouseGraphPos.y
+      );
 
-    stage.on('pointermove', (moveData: interaction.InteractionEvent) => {
-      if (!isDragging) {
-        return;
+      if (nodesUnderMouse.length === 1) {
+        this.nodeUnderMouse.node = nodesUnderMouse[0];
+        this.nodeUnderMouse.nodePos = nodeManager.getComponent(
+          this.nodeUnderMouse.node,
+          PositionComponent
+        );
+        nodeManager.getComponent(
+          this.nodeUnderMouse.node,
+          UserControlledComponent
+        ).isControlled = true;
       }
-      let pos = moveData.data.global;
-      let dx = pos.x - prevX;
-      let dy = pos.y - prevY;
-
-      this.graphGraphics.position.x += dx;
-      this.graphGraphics.position.y += dy;
-      prevX = pos.x;
-      prevY = pos.y;
+      event.preventDefault();
     });
 
-    stage.on('pointerup', (moveData: interaction.InteractionEvent) => {
-      console.log('pointerup');
-      isDragging = false;
+    container.addEventListener('pointermove', (event: MouseEvent) => {
+      if (this.isDragging) {
+        let mouseX = event.pageX - container.offsetLeft;
+        let mouseY = event.pageY - container.offsetTop;
+
+        if (this.nodeUnderMouse.node) {
+          const graphPos = this.getGraphCoordinates(mouseX, mouseY);
+          this.nodeUnderMouse.nodePos.x = graphPos.x;
+          this.nodeUnderMouse.nodePos.y = graphPos.y;
+        } else {
+          let dx = mouseX - prevX;
+          let dy = mouseY - prevY;
+
+          this.graphGraphics.position.x += dx;
+          this.graphGraphics.position.y += dy;
+          this.graphGraphics.updateTransform();
+        }
+
+        prevX = mouseX;
+        prevY = mouseY;
+      }
+    });
+
+    container.addEventListener('pointerup', () => {
+      if (this.nodeUnderMouse.node) {
+        nodeManager.getComponent(
+          this.nodeUnderMouse.node,
+          UserControlledComponent
+        ).isControlled = false;
+        this.nodeUnderMouse = {
+          node: null,
+          nodePos: null
+        };
+      }
+      this.mouseDown = false;
+      this.isDragging = false;
+    });
+
+    container.addEventListener('pointerleave', () => {
+      if (this.nodeUnderMouse.node) {
+        nodeManager.getComponent(
+          this.nodeUnderMouse.node,
+          UserControlledComponent
+        ).isControlled = false;
+        this.nodeUnderMouse = {
+          node: null,
+          nodePos: null
+        };
+      }
+      this.mouseDown = false;
+      this.isDragging = false;
     });
   }
 }

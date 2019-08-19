@@ -1,97 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Document</title>
     <style>
-        html,
-        body {
-            height: 100%;
-            width: 100%;
-        }
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+      }
 
-        body {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-        }
+      body {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
 
-        #container {
-            width: 90%;
-            height: 90%;
+      #container {
+        width: 90%;
+        height: 90%;
 
-            border: 1px solid black;
-        }
+        border: 1px solid black;
+      }
     </style>
-</head>
+  </head>
 
-<body>
-    <div id="container">
-    </div>
-    <script src='./VNetGraph.js'></script>
+  <body>
+    <div id="container"></div>
+    <script src="./VNetGraph.js"></script>
     <script>
-        function getScaleFreeNetwork(nodeCount) {
-            /* eslint-enable */
-            var nodes = [];
-            var edges = [];
-            var connectionCount = [];
+      function getScaleFreeNetwork(nodeCount) {
+        /* eslint-enable */
+        var nodes = [];
+        var edges = [];
+        var connectionCount = [];
 
-            // randomly create some nodes and edges
-            for (var i = 0; i < nodeCount; i++) {
-                nodes.push({
-                    id: i
-                });
+        // randomly create some nodes and edges
+        for (var i = 0; i < nodeCount; i++) {
+          nodes.push({
+            id: i
+          });
 
-                connectionCount[i] = 0;
+          connectionCount[i] = 0;
 
-                // create edges in a scale-free-network way
-                if (i == 1) {
-                    let from = i;
-                    let to = 0;
-                    edges.push({
-                        from: from,
-                        to: to
-                    });
-                    connectionCount[from]++;
-                    connectionCount[to]++;
-                } else if (i > 1) {
-                    var conn = edges.length * 2;
-                    var rand = Math.floor(Math.random() * conn);
-                    var cum = 0;
-                    var j = 0;
-                    while (j < connectionCount.length && cum < rand) {
-                        cum += connectionCount[j];
-                        j++;
-                    }
-
-                    var from = i;
-                    var to = j;
-                    edges.push({
-                        from: from,
-                        to: to
-                    });
-                    connectionCount[from]++;
-                    connectionCount[to]++;
-                }
+          // create edges in a scale-free-network way
+          if (i == 1) {
+            let from = i;
+            let to = 0;
+            edges.push({
+              from: from,
+              to: to
+            });
+            connectionCount[from]++;
+            connectionCount[to]++;
+          } else if (i > 1) {
+            var conn = edges.length * 2;
+            var rand = Math.floor(Math.random() * conn);
+            var cum = 0;
+            var j = 0;
+            while (j < connectionCount.length && cum < rand) {
+              cum += connectionCount[j];
+              j++;
             }
 
-            return {
-                nodes: nodes,
-                edges: edges
-            };
+            var from = i;
+            var to = j;
+            edges.push({
+              from: from,
+              to: to
+            });
+            connectionCount[from]++;
+            connectionCount[to]++;
+          }
         }
 
-        const scaleFreeNetwork = getScaleFreeNetwork(200);
+        return {
+          nodes: nodes,
+          edges: edges
+        };
+      }
 
-        const graph = new VNetGraph(document.getElementById('container'), scaleFreeNetwork.nodes, scaleFreeNetwork
-            .edges, {});
+      const scaleFreeNetwork = getScaleFreeNetwork(250);
 
-        graph.start();
+      const graph = new VNetGraph(
+        document.getElementById('container'),
+        scaleFreeNetwork.nodes,
+        scaleFreeNetwork.edges,
+        {}
+      );
+
+      graph.start();
     </script>
-</body>
-
+  </body>
 </html>
