@@ -37,7 +37,7 @@ export default class EdgeManager {
     _spring.to = to;
 
     if (label) {
-      _label.text = label.text || _label.text;
+      _label.text.text = label.text || _label.text.text;
       _label.alignment = label.alignment || _label.alignment;
     }
 

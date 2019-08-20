@@ -4,7 +4,7 @@ import VelocityComponent from '../Components/VelocityComponent';
 import ForceComponent from '../Components/ForceComponent';
 import PositionComponent from '../Components/PositionComponent';
 import UserControlledComponent from '../Components/UserControlledComponent';
-import { deepExtend } from '../Utils';
+import { deepExtend, addVecs, divideVecByScalar, absVec } from '../Utils';
 
 export default class VelocityVerlet {
   private _nodeManager: NodeManager;
@@ -22,6 +22,11 @@ export default class VelocityVerlet {
   }
 
   public update(dt: number, worldBounds: Bounds) {
+    let totalVelocity = {
+      x: 0,
+      y: 0
+    };
+
     const nodes = this._nodeManager.nodes;
     const nodeVelocities = this._nodeManager.getComponentsOfType(
       VelocityComponent
@@ -44,6 +49,9 @@ export default class VelocityVerlet {
 
       vel.x = this._calculateVelocity(vel.x, force.x, 1);
       vel.y = this._calculateVelocity(vel.y, force.y, 1);
+
+      totalVelocity = addVecs(totalVelocity, absVec(vel));
+
       if (userControlledNodes[node.index].isControlled === false) {
         pos.x += vel.x * dt;
         pos.y += vel.y * dt;
@@ -64,15 +72,21 @@ export default class VelocityVerlet {
       force.x = 0;
       force.y = 0;
     }
+
+    return divideVecByScalar(totalVelocity, nLen);
   }
 
   private _calculateVelocity(velocity: number, force: number, mass: number) {
-    const dampingForce = 0.9 * velocity;
+    const dampingForce = this._options.damping * velocity;
     let a = (force - dampingForce) / mass;
     velocity += a;
 
-    if (Math.abs(velocity) > 100) {
-      velocity = velocity < 0 ? -100 : 100;
+    if (
+      velocity < this._options.minVelocity ||
+      velocity > this._options.maxVelocity
+    ) {
+      velocity =
+        velocity < 0 ? this._options.minVelocity : this._options.maxVelocity;
     }
 
     return velocity;

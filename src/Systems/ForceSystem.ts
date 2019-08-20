@@ -146,7 +146,7 @@ export default class ForceSystem {
   }
 
   public getNodeAt(x: number, y: number) {
-    const bounds = new AABB({ x, y }, { x: 10, y: 10 });
+    const bounds = new AABB({ x, y }, { x: 15, y: 15 });
     return this.barnesHutTree.query(bounds);
   }
 }

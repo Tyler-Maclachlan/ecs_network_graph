@@ -1,12 +1,4 @@
-import {
-  Renderer,
-  autoDetectRenderer,
-  Container,
-  Ticker,
-  Graphics,
-  Text,
-  Rectangle
-} from 'pixi.js';
+import { Renderer, autoDetectRenderer, Container, Graphics } from 'pixi.js';
 import { Bounds } from '../types';
 import PositionComponent from '../Components/PositionComponent';
 import SpringComponent from '../Components/SpringComponent';
@@ -15,6 +7,7 @@ import NodeManager from '../Managers/NodeManager';
 import ShapeComponent from '../Components/ShapeComponent';
 import { QuadTree } from '../Utils';
 import LabelComponent from '../Components/LabelComponent';
+import SizeComponent from '../Components/SizeComponent';
 
 export default class RenderSystem {
   public _canvasContainer: HTMLElement;
@@ -23,7 +16,6 @@ export default class RenderSystem {
   public _graphicsContainer: Container;
   private _nodesContainer: Container;
   private _edgesContainer: Container;
-  private _ticker: Ticker;
   public _graphics: Graphics;
 
   constructor(container: HTMLElement) {
@@ -42,7 +34,6 @@ export default class RenderSystem {
     this._canvasContainer.appendChild(this._renderer.view);
 
     // Create ticker and graphics
-    this._ticker = new Ticker();
     this._graphics = new Graphics();
     // this._graphics.scale.set(0.5, 0.5);
     /*
@@ -64,7 +55,7 @@ export default class RenderSystem {
     this._edgesContainer.buttonMode = true;
 
     // Add Node and Edge containers to global container
-    this._nodesContainer.addChild(this._graphics);
+    this._graphicsContainer.addChild(this._graphics);
     this._graphicsContainer.addChild(this._nodesContainer);
     this._graphicsContainer.addChild(this._edgesContainer);
 
@@ -108,15 +99,15 @@ export default class RenderSystem {
 
     const nodePositions = nodeManager.getComponentsOfType(PositionComponent);
     const nodeLabels = nodeManager.getComponentsOfType(LabelComponent);
+    const nodeSizes = nodeManager.getComponentsOfType(SizeComponent);
     const shapes = nodeManager.getComponentsOfType(ShapeComponent);
 
     const eLen = edges.length;
     const nLen = nodes.length;
-    let i;
+    let i, nodeSize, nodeLabel;
     this._graphics.clear();
 
     // draw edges
-    this._graphics.beginFill(0xff0000, 1);
     this._graphics.lineStyle(1, 0xff0000, 1);
     for (i = 0; i < eLen; i++) {
       const edge = edges[i];
@@ -132,9 +123,20 @@ export default class RenderSystem {
     this._graphics.lineStyle(0);
     for (i = 0; i < nLen; i++) {
       const node = nodes[i];
+      nodeSize = nodeSizes[node.index];
+      nodeLabel = nodeLabels[node.index];
       const { x, y } = nodePositions[node.index];
-      this._graphics.drawRect(x - 10, y - 10, 20, 20);
+      this._graphics.drawRect(
+        x - nodeSize.width / 2,
+        y - nodeSize.height / 2,
+        nodeSize.width,
+        nodeSize.height
+      );
+      this._graphics
+        .addChild(nodeLabel.text)
+        .position.set(x - nodeLabel.text.width / 2, y + nodeSize.height / 2);
     }
+    this._graphics.endFill();
 
     // this._graphics.beginFill(0x0033ff, 0);
     // this._graphics.lineStyle(1, 0x00ff00);
@@ -167,7 +169,6 @@ export default class RenderSystem {
           renderTree(branch.BL);
           renderTree(branch.BR);
         }
-        this._graphics.beginFill(0x0033ff, 0);
         this._graphics.lineStyle(
           1,
           parseInt(colors[i].toLowerCase().replace('#', '0x'), 16)
@@ -177,19 +178,6 @@ export default class RenderSystem {
           branch.bounds.position.y,
           branch.bounds.size.x,
           branch.bounds.size.y
-        );
-        this._graphics.beginFill(
-          parseInt(colors[i].toLowerCase().replace('#', '0x'), 16),
-          1
-        );
-        this._graphics.lineStyle(
-          1,
-          parseInt(colors[i].toLowerCase().replace('#', '0x'), 16)
-        );
-        this._graphics.drawCircle(
-          branch.centerOfMass.x,
-          branch.centerOfMass.y,
-          5
         );
       };
 

@@ -1,4 +1,9 @@
-import { addWheelListener, GenerationalIndex as Entity } from '../Utils';
+import {
+  addWheelListener,
+  GenerationalIndex as Entity,
+  TypedEventEmitter,
+  Event
+} from '../Utils';
 import { Renderer, Graphics, interaction, Container } from 'pixi.js';
 import RenderSystem from './RenderSystem';
 import ForceSystem from './ForceSystem';
@@ -28,16 +33,19 @@ export default class InputSystem {
     node: null,
     nodePos: null
   };
+  private _eventEmitter: TypedEventEmitter;
 
   constructor(
     renderer: RenderSystem,
     forceSystem: ForceSystem,
-    nodeManager: NodeManager
+    nodeManager: NodeManager,
+    eventEmitter: TypedEventEmitter
   ) {
     this.graphContainer = renderer._canvasContainer;
     this.graphGraphics = renderer._graphics;
     this.graphStage = renderer._graphicsContainer;
     this.forceSystem = forceSystem;
+    this._eventEmitter = eventEmitter;
 
     addWheelListener(
       renderer._canvasContainer,
@@ -114,7 +122,9 @@ export default class InputSystem {
           this.nodeUnderMouse.node,
           UserControlledComponent
         ).isControlled = true;
+        this._eventEmitter.emit(Event.NODE_SELECTED, '');
       }
+      this._eventEmitter.emit(Event.DRAG_START, '');
       event.preventDefault();
     });
 
@@ -127,6 +137,7 @@ export default class InputSystem {
           const graphPos = this.getGraphCoordinates(mouseX, mouseY);
           this.nodeUnderMouse.nodePos.x = graphPos.x;
           this.nodeUnderMouse.nodePos.y = graphPos.y;
+          this._eventEmitter.emit(Event.DRAGGING, '');
         } else {
           let dx = mouseX - prevX;
           let dy = mouseY - prevY;
@@ -154,6 +165,7 @@ export default class InputSystem {
       }
       this.mouseDown = false;
       this.isDragging = false;
+      this._eventEmitter.emit(Event.DRAG_END, '');
     });
 
     container.addEventListener('pointerleave', () => {
@@ -166,9 +178,11 @@ export default class InputSystem {
           node: null,
           nodePos: null
         };
+        this._eventEmitter.emit(Event.NODE_DESELECTED, '');
       }
       this.mouseDown = false;
       this.isDragging = false;
+      this._eventEmitter.emit(Event.DRAG_END, '');
     });
   }
 }

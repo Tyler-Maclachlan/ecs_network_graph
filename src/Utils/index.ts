@@ -2,6 +2,7 @@ export * from './uuid';
 export * from './vector2d';
 export * from './DeepExtend';
 export * from './MouseWheelListener';
+export * from './TypedEventEmitter';
 import GenerationalIndex from './GenerationalIndex';
 import GenerationalIndexAllocator from './GenerationalIndexAllocator';
 import GenerationalIndexArray from './GenerationalIndexArray';

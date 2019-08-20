@@ -34,10 +34,6 @@ export default class NodeManager {
   }
 
   public createNode(options: NodeOptions) {
-    options.label = {
-      text: 'label',
-      alignment: 'bottom'
-    };
     let { id, shape, color, size, label, data } = options;
     if (id === null || id === undefined) {
       id = uuid();
@@ -92,7 +88,7 @@ export default class NodeManager {
 
     if (label) {
       const labelComponent = this.addComponent(_node, new LabelComponent());
-      labelComponent.text = label.text;
+      labelComponent.text.text = label.text;
       labelComponent.alignment = label.alignment;
     }
   }

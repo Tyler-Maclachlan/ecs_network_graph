@@ -92,6 +92,13 @@ export function getAngleBetweenVecs(vec1: Vector2D, vec2: Vector2D) {
   return radsToDegrees(Math.acos(theta));
 }
 
+export function absVec(vec1: Vector2D): Vector2D {
+  return {
+    x: vec1.x > 0 ? vec1.x : -vec1.x,
+    y: vec1.y > 0 ? vec1.y : -vec1.y
+  };
+}
+
 export function radsToDegrees(rads: number) {
   return (rads * 180) / Math.PI;
 }
