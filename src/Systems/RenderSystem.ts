@@ -5,7 +5,12 @@ import SpringComponent from '../Components/SpringComponent';
 import EdgeManager from '../Managers/EdgeManager';
 import NodeManager from '../Managers/NodeManager';
 import ShapeComponent from '../Components/ShapeComponent';
-import { QuadTree } from '../Utils';
+import {
+  QuadTree,
+  getMidpointBetweenVecs,
+  getAngleBetweenVecs,
+  getDistanceBetweenVecs
+} from '../Utils';
 import LabelComponent from '../Components/LabelComponent';
 import SizeComponent from '../Components/SizeComponent';
 
@@ -13,9 +18,12 @@ export default class RenderSystem {
   public _canvasContainer: HTMLElement;
   public _canvas: HTMLCanvasElement;
   public _renderer: Renderer;
-  public _graphicsContainer: Container;
+  public _stage: Container;
   private _nodesContainer: Container;
   private _edgesContainer: Container;
+  private _labelContainer: Container;
+  private _nodeLabelContainer: Container;
+  private _edgeLabelContainer: Container;
   public _graphics: Graphics;
 
   constructor(container: HTMLElement) {
@@ -40,9 +48,9 @@ export default class RenderSystem {
         Create global container
         Panning will be done on this container
     */
-    this._graphicsContainer = new Container();
-    this._graphicsContainer.interactive = true;
-    this._graphicsContainer.buttonMode = true;
+    this._stage = new Container();
+    this._stage.interactive = true;
+    this._stage.buttonMode = true;
 
     // Create Node container
     this._nodesContainer = new Container();
@@ -54,16 +62,26 @@ export default class RenderSystem {
     this._edgesContainer.interactive = true;
     this._edgesContainer.buttonMode = true;
 
+    // Create label container
+    this._labelContainer = new Container();
+
+    this._nodeLabelContainer = new Container();
+    this._edgeLabelContainer = new Container();
+
+    this._labelContainer.addChild(this._nodeLabelContainer);
+    this._labelContainer.addChild(this._edgeLabelContainer);
+
     // Add Node and Edge containers to global container
-    this._graphicsContainer.addChild(this._graphics);
-    this._graphicsContainer.addChild(this._nodesContainer);
-    this._graphicsContainer.addChild(this._edgesContainer);
+    this._stage.addChild(this._graphics);
+    this._graphics.addChild(this._nodesContainer);
+    this._graphics.addChild(this._edgesContainer);
+    this._graphics.addChild(this._labelContainer);
 
     window.addEventListener('resize', this._onResize.bind(this));
   }
 
   public getBounds(): Bounds {
-    const { left, right, top, bottom } = this._graphicsContainer.getBounds();
+    const { left, right, top, bottom } = this._stage.getBounds();
     return { left, right, top, bottom };
   }
 
@@ -83,7 +101,7 @@ export default class RenderSystem {
 
     this._graphics.scale.set(scale, scale);
     this._graphics.updateTransform();
-    this._renderer.render(this._graphicsContainer);
+    this._renderer.render(this._stage);
   }
 
   public render(
@@ -111,17 +129,52 @@ export default class RenderSystem {
     this._graphics.lineStyle(1, 0xff0000, 1);
     for (i = 0; i < eLen; i++) {
       const edge = edges[i];
+      const label = edgeLabels[edge.index];
       const spring = springs[edge.index];
       const to = nodePositions[spring.to.index];
       const from = nodePositions[spring.from.index];
+      const labelPos = getMidpointBetweenVecs(to, from);
       this._graphics.moveTo(from.x, from.y);
       this._graphics.lineTo(to.x, to.y);
+      const triangleAngle = -1.5 * Math.PI + getAngleBetweenVecs(to, from);
+      
+      const distToBorder =
+        Math.min(
+          Math.abs(5 / Math.cos(triangleAngle)),
+          Math.abs(5 / Math.sin(triangleAngle))
+        ) + 15;
+
+      const toBorderPoint =
+        (getDistanceBetweenVecs(to, from) - distToBorder) /
+        getDistanceBetweenVecs(to, from);
+      const borderPos = {
+        x: 0,
+        y: 0
+      };
+
+      borderPos.x = (1 - toBorderPoint) * from.x + toBorderPoint * to.x;
+      borderPos.y = (1 - toBorderPoint) * from.y + toBorderPoint * to.y;
+
+      this._graphics.beginFill(0xff0000, 1);
+      this._graphics.drawStar(
+        borderPos.x,
+        borderPos.y,
+        3,
+        10,
+        5,
+        triangleAngle
+      );
+
+      this._graphics.endFill();
+      this._edgeLabelContainer
+        .addChild(label.text)
+        .position.set(labelPos.x - label.text.width / 2, labelPos.y);
     }
 
     // draw nodes
-    this._graphics.beginFill(0x0033ff, 1);
-    this._graphics.lineStyle(0);
     for (i = 0; i < nLen; i++) {
+      this._graphics.beginFill(0x0033ff, 1);
+      this._graphics.lineStyle(0);
       const node = nodes[i];
       nodeSize = nodeSizes[node.index];
       nodeLabel = nodeLabels[node.index];
@@ -132,11 +185,11 @@ export default class RenderSystem {
         nodeSize.width,
         nodeSize.height
       );
-      this._graphics
+      this._graphics.endFill();
+      this._nodeLabelContainer
         .addChild(nodeLabel.text)
         .position.set(x - nodeLabel.text.width / 2, y + nodeSize.height / 2);
     }
-    this._graphics.endFill();
 
     // this._graphics.beginFill(0x0033ff, 0);
     // this._graphics.lineStyle(1, 0x00ff00);
@@ -184,7 +237,7 @@ export default class RenderSystem {
       renderTree(tree);
     }
 
-    this._renderer.render(this._graphicsContainer);
+    this._renderer.render(this._stage);
   }
 
   private _onResize() {
@@ -193,6 +246,6 @@ export default class RenderSystem {
       this._canvasContainer.clientHeight
     );
     this._graphics.updateTransform();
-    this._renderer.render(this._graphicsContainer);
+    this._renderer.render(this._stage);
   }
 }

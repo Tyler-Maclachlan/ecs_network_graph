@@ -43,7 +43,7 @@ export default class InputSystem {
   ) {
     this.graphContainer = renderer._canvasContainer;
     this.graphGraphics = renderer._graphics;
-    this.graphStage = renderer._graphicsContainer;
+    this.graphStage = renderer._stage;
     this.forceSystem = forceSystem;
     this._eventEmitter = eventEmitter;
 

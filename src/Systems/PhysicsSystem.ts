@@ -22,10 +22,10 @@ export default class PhysicsSystem {
   private _options = {
     force: {
       gravitationalConstant: -80000,
-      theta: 0.5
+      theta: 0.7
     },
     spring: {
-      stiffness: 5,
+      stiffness: 0.08,
       restDistance: 200,
       damping: 0.003
     },

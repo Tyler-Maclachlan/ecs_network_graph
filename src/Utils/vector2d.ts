@@ -84,12 +84,7 @@ export function crossVecs(vec1: Vector2D, vec2: Vector2D): number {
 }
 
 export function getAngleBetweenVecs(vec1: Vector2D, vec2: Vector2D) {
-  const vec1Len = getVecLength(vec1);
-  const vec2Len = getVecLength(vec2);
-
-  const dot = dotVecs(vec1, vec2);
-  const theta = dot / (vec1Len * vec2Len);
-  return radsToDegrees(Math.acos(theta));
+  return Math.atan2(vec1.y - vec2.y, vec1.x - vec2.x);
 }
 
 export function absVec(vec1: Vector2D): Vector2D {

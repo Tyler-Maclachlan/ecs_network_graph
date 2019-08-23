@@ -56,7 +56,10 @@
           let to = 0;
           edges.push({
             from: from,
-            to: to
+            to: to,
+            label: {
+              text: `Edge ${from}->${to}`
+            }
           });
           connectionCount[from]++;
           connectionCount[to]++;
@@ -74,7 +77,10 @@
           var to = j;
           edges.push({
             from: from,
-            to: to
+            to: to,
+            label: {
+              text: `Edge ${from}->${to}`
+            }
           });
           connectionCount[from]++;
           connectionCount[to]++;
@@ -87,7 +93,7 @@
       };
     }
 
-    const scaleFreeNetwork = getScaleFreeNetwork(2500);
+    const scaleFreeNetwork = getScaleFreeNetwork(100);
 
     const graph = new VNetGraph(
       document.getElementById('container'),
